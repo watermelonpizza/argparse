@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "argparse", "argparse\argparse.csproj", "{22E4A803-EAA7-484D-8431-161EA8A4C63D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "argparse", "argparse\argparse.csproj", "{22E4A803-EAA7-484D-8431-161EA8A4C63D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "argparse.UnitTests", "argparse.UnitTests\argparse.UnitTests.csproj", "{7D079CC8-A2A8-41A1-9B42-9AAFEAB0BD73}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{54987C68-9948-4D91-8B2A-2D8719B60909}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleArgumentSample", "SimpleArgumentSample\SimpleArgumentSample.csproj", "{24F61C2C-4B31-44FA-B068-DA92723B0326}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +21,19 @@ Global
 		{22E4A803-EAA7-484D-8431-161EA8A4C63D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22E4A803-EAA7-484D-8431-161EA8A4C63D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22E4A803-EAA7-484D-8431-161EA8A4C63D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D079CC8-A2A8-41A1-9B42-9AAFEAB0BD73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D079CC8-A2A8-41A1-9B42-9AAFEAB0BD73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D079CC8-A2A8-41A1-9B42-9AAFEAB0BD73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D079CC8-A2A8-41A1-9B42-9AAFEAB0BD73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24F61C2C-4B31-44FA-B068-DA92723B0326}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24F61C2C-4B31-44FA-B068-DA92723B0326}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24F61C2C-4B31-44FA-B068-DA92723B0326}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24F61C2C-4B31-44FA-B068-DA92723B0326}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{24F61C2C-4B31-44FA-B068-DA92723B0326} = {54987C68-9948-4D91-8B2A-2D8719B60909}
 	EndGlobalSection
 EndGlobal
