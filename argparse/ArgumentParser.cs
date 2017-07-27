@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace argparse
 {
-    public class ArgumentParser
+    public static class ArgumentParser
     {
         //new BasicArgumentParser();
         // No such thing as scoped commands. Cannot have multiple 'multiple' positional arguments.
@@ -25,9 +28,31 @@ namespace argparse
 
         // Usage: app [OPTIONS] SCOPE [BasicArgumentParser]
 
-        /// 
+        /// <summary>
+        /// Sets the mode for this argument parser
+        /// </summary>
+        public static ParserMode ParserMode { get; set; }
 
-        // All 
+        public static void AddArguments<T>()
+        {
+
+        }
+
+        public static void Add<TOptions, TArgument>(Expression<Func<TOptions, TArgument>> exp)
+            where TOptions : class, new()
+            where TArgument : struct
+        {
+            IList<string> s;
+        }
+
+        public static void AddPostiionalArgument<>
+
+        public static IBasicArgumentParser ForScope(string scope)
+        {
+
+        }
+
+        public static 
 
         public static readonly IReadOnlyCollection<Type> SupportedTypes = new Type[]
         {
