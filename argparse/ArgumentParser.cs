@@ -9,6 +9,8 @@ namespace argparse
 {
     public static class ArgumentParser
     {
+        public const char NoArgumentFlag = char.MinValue;
+
         //new BasicArgumentParser();
         // No such thing as scoped commands. Cannot have multiple 'multiple' positional arguments.
         // Last positional argument can be the only one with 'multiple' set to true

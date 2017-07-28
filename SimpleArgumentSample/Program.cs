@@ -31,6 +31,58 @@ namespace SimpleArgumentSample
 
             ArgumentParser.Parse(args);
 
+            var g = new GeneralOptions();
+            var network = new NetworkOptions();
+
+            var bap = new BasicArgumentParser();
+            var general = bap
+                .CreateArgumentCatagory(g)
+                    .WithArgument(x => x.Flag)
+                        .Required()
+                        .Name("blah")
+                    .WithArgument(x => x.CountMe)
+                .CreateArgumentCatagory(network)
+                    .WithArgument(x => x.Integer)
+                        .Name("intplx")
+                        .Flag('i');
+
+            bap.CreatePositionalArgument().CreateMultiPositionalArgument()
+
+            general.WithArgument(x => x.Flag);
+            
+            bap.CreateArgumentCatagory()
+                    .WithArgument()
+                    .WithMultiArgument();
+
+            bap.CreatePositionalArgument()
+                .CreatePositionalArgument()
+                .CreateMultiPositionalArgument()
+                .AddPostiionalArgument()
+                .AddMultiPositionalArgument();
+
+            CommandArgumentParser                       // CommandArgumentParser
+                .ArgumentCatagory()                     // CommandArgumentCatagory (1)
+                    .AddArgument()                      // CommandArgumentCatagory (1)
+                    .AddArgument()                      // CommandArgumentCatagory (1)
+                .ArgumentCatagory()                     // CommandArgumentCatagory (2)
+                    .AddMutliArgument()                 // CommandArgumentCatagory (2)
+                    .AddCountArgument()                 // CommandArgumentCatagory (2)
+                .CommandCatagory()                      // CommandCatagory (1)
+                    .AddCommand()                       // BasicCommandArgumentParser (1)
+                        .ArgumentCatagory()             // BasicCommandArgumentCatagory (1)
+                            .AddArgument()              // BasicCommandArgumentCatagory (1)
+                            .AddArgument()              // BasicCommandArgumentCatagroy (1)
+                        .ArgumentCatagory()             // BasicCommandArgumentCatagroy (2)
+                            .AddArgument()              // BasicCommandArgumentCatagroy (2)
+                            .AddMultiArgument()         // BasicCommandArgumentCatagroy (2)
+                        .AddPositionalArgument()        // BasicCommandArgumentParser
+                        .AddPostiionalArgument()        // BasicCommandArgumentParser
+                        .AddMultiPositionalArgument()   // RestrictedBasicCommandArgumentParser
+                    .AddCommand()                       // BasicCommandArgumentParser (2)
+                    .AddCommand()                       // BasicCommandArgumentParser (2)
+                .CommandCatagory()                      // CommandCatagory (2)
+                    .AddCommand()                       // BasicCommandArgumentParser (2)
+
             AddArgument
             AddMultiArgument
             AddCountArgument
@@ -76,6 +128,8 @@ namespace SimpleArgumentSample
         public TypeCode MyEnum { get; set; }
         public IEnumerable<string> List { get; set; }
         public string Str { get; set; }
+
+        public uint CountMe { get; set; }
     }
 
     class NetworkOptions
