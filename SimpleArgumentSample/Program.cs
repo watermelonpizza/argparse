@@ -8,119 +8,80 @@ namespace SimpleArgumentSample
 {
     class Program
     {
+        //new BasicArgumentParser();
+        // No such thing as scoped commands. Cannot have multiple 'multiple' positional arguments.
+        // Last positional argument can be the only one with 'multiple' set to true
+        // Can mix and match options throughout the command
+
+        // Usage: app [OPTIONS] FILE [FILE...]
+        //        app [OPTIONS] SOURCE DESTINATION
+        //        app [OPTIONS] SOURCE DESTINATION [DESTINATION...]
+        // app [opt] [source ] [ dest  ] [                            opt                      ] [  dest  ]
+        // app -f -v file1.txt file3.txt -vvpoD --long-name-argument --argument-with-value value file46.txt
+
+        //new ScopedArgumentParser();
+        // Only scoped arguments allowed. First positional must be global scope arguments, second positional must be scope name.
+        // After scope name all arguments are arguments for that scope.
+        // Cannot mix and match scope-name/global arguments.
+        // Can mix and match scope arguments. (After scope name is declared arguments after scope is a BasicArgumentParser)
+
+        // Usage: app [OPTIONS] SCOPE [BasicArgumentParser]
         static void Main(string[] args)
         {
-            dynamic argparser = null; // BasicArgumentParser
-
-            ///
-            /// Basic
-            ///
-
-            ArgumentParser.ParserMode = ParserMode.Basic;
-
             ArgumentParser
-                .ArgumentCatagory(name: "General Options", position: 1)
-                    .AddArgument<GeneralOptions>(property: x => x.Flag, flag: 'f', name: "flag", type: typeof(bool), help: "help doco for this thing", required: true);
-
-            ArgumentParser
-                .ArgumentCatagory(name: "Network Options", position: 2)
-                    .AddArguments<NetworkOptions>();
-
-            ArgumentParser.AddPositionalArgument<string>(description: "source", position: 1, multiple: true);
-            ArgumentParser.AddPositionalArgument<string>(description: "dest", position: 2, multiple: true);
-
-            ArgumentParser.Parse(args);
-
-            var g = new GeneralOptions();
-            var network = new NetworkOptions();
-
-            var bap = new BasicArgumentParser();
-            var general = bap
-                .CreateArgumentCatagory(g)
+                .Default
+                .CreateArgumentCatagory<GeneralOptions>()
                     .WithArgument(x => x.Flag)
                         .Required()
                         .Name("blah")
                     .WithArgument(x => x.CountMe)
-                .CreateArgumentCatagory(network)
+                .CreateArgumentCatagory<NetworkOptions>()
                     .WithArgument(x => x.Integer)
                         .Name("intplx")
                         .Flag('i');
 
-            bap.CreatePositionalArgument().CreateMultiPositionalArgument()
-
-            general.WithArgument(x => x.Flag);
-            
-            bap.CreateArgumentCatagory()
-                    .WithArgument()
-                    .WithMultiArgument();
-
-            bap.CreatePositionalArgument()
-                .CreatePositionalArgument()
-                .CreateMultiPositionalArgument()
-                .AddPostiionalArgument()
-                .AddMultiPositionalArgument();
-
-            CommandArgumentParser                       // CommandArgumentParser
-                .ArgumentCatagory()                     // CommandArgumentCatagory (1)
-                    .AddArgument()                      // CommandArgumentCatagory (1)
-                    .AddArgument()                      // CommandArgumentCatagory (1)
-                .ArgumentCatagory()                     // CommandArgumentCatagory (2)
-                    .AddMutliArgument()                 // CommandArgumentCatagory (2)
-                    .AddCountArgument()                 // CommandArgumentCatagory (2)
-                .CommandCatagory()                      // CommandCatagory (1)
-                    .AddCommand()                       // BasicCommandArgumentParser (1)
-                        .ArgumentCatagory()             // BasicCommandArgumentCatagory (1)
-                            .AddArgument()              // BasicCommandArgumentCatagory (1)
-                            .AddArgument()              // BasicCommandArgumentCatagroy (1)
-                        .ArgumentCatagory()             // BasicCommandArgumentCatagroy (2)
-                            .AddArgument()              // BasicCommandArgumentCatagroy (2)
-                            .AddMultiArgument()         // BasicCommandArgumentCatagroy (2)
-                        .AddPositionalArgument()        // BasicCommandArgumentParser
-                        .AddPostiionalArgument()        // BasicCommandArgumentParser
-                        .AddMultiPositionalArgument()   // RestrictedBasicCommandArgumentParser
-                    .AddCommand()                       // BasicCommandArgumentParser (2)
-                    .AddCommand()                       // BasicCommandArgumentParser (2)
-                .CommandCatagory()                      // CommandCatagory (2)
-                    .AddCommand()                       // BasicCommandArgumentParser (2)
-
-            AddArgument
-            AddMultiArgument
-            AddCountArgument
-
-            ///
-            /// Scoped
-            ///
-
-            ArgumentParser.ParserMode = ParserMode.Scoped;
-
-            ArgumentParser.AddArguments<Options>(name: "Options");
-
             ArgumentParser
-                .CommandCatagory(name: "Management Commands")
-                    .AddCommand(name: "config", help: "The config of the thing", argumentParser: new BasicArgumentParser())
-                    .AddCommand(name: "image", help: "Gets images", argumentParser: new BasicArgumentParser());
-
-            ArgumentParser
-                .CommandCatagory(name: "Commands")
-                    .AddCommand(name: "ps", help: "List stuff", argumentParser: new BasicArgumentParser());
+                .Default
+                .CreateParameterCatagory<PositionalOptions>()
+                    .WithParameter(x => x.Source)
+                        .Name("string")
+                        .Position(1)
+                    .WithParameter(x => x.Destination)
+                        .Name("dest")
+                        .Position(2);
             
-            ArgumentParser.AddArguments<Options>(name: "Options");
-            ArgumentParser.CommandCatagory(name: "Commands")
+            ArgumentParser
+                .Default
+                .CreateCommandCatagory<Commands>()
+                    .Name("comANDS")
+                    .WithCommand(x => x.Config, SetupConfigCommand)
+                        .Help("THis is config")
+                .CreateCommandCatagory<SimpleCommands>()
+                    .WithCommand(x => x.Config);
 
-            argparser.AddArguments<GeneralOptions>(scope: "*", description: "Options");
-            GeneralOptions go = argparser.GetArguments<GeneralOptions>();
-            argparser.AddArguments<GeneralOptions>(scope: "*", description: "General Options");
+            ArgumentParser.Default.Parse(args);
 
-            var options =  argparser.Catagory("Options");
+            GeneralOptions go = ArgumentParser.Default.GetArgumentCatagory<GeneralOptions>();
+            NetworkOptions no = ArgumentParser.Default.GetArgumentCatagory<NetworkOptions>();
+            PositionalOptions po = ArgumentParser.Default.GetParameterCatagory<PositionalOptions>();
 
-            options.Catagory("General Options").AddArguments<GeneralOptions>();
-            options.Catagory("Network Options").AddArguments<GeneralOptions>();
+            Commands c = ArgumentParser.Default.GetCommandCatagory<Commands>();
+            SimpleCommands sc = ArgumentParser.Default.GetCommandCatagory<SimpleCommands>();
+
+            ConfigCommands cc = c.Config.GetArgumentCatagory<ConfigCommands>();
+        }
+
+        static void SetupConfigCommand(IArgumentParser argParser)
+        {
+            argParser
+                .CreateArgumentCatagory<ConfigCommands>()
+                    .Name("Options")
+                    .WithArgument(x => x.Basic);
         }
     }
 
     class GeneralOptions
     {
-        [Argument(flag: 'f', name: "flag", type: typeof(bool), help: "help doco for this thing", required: true)]
         public bool Flag { get; set; }
 
         public NetworkOptions Network { get; set; }
@@ -134,7 +95,27 @@ namespace SimpleArgumentSample
 
     class NetworkOptions
     {
-        [Argument(flag: 'i', name: 'countme', type: typeof(int), count: true, help: "This will count number of times you use it")]
         public int Integer { get; set; }
+    }
+
+    class ConfigCommands
+    {
+        public string Basic { get; set; }
+    }
+
+    class Commands
+    {
+        public IArgumentParser Config { get; set; }
+    }
+
+    class SimpleCommands
+    {
+        public bool Config { get; set; }
+    }
+
+    class PositionalOptions
+    {
+        public string Source { get; set; }
+        public IEnumerable<string> Destination { get; set; }
     }
 }

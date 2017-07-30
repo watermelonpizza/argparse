@@ -7,55 +7,95 @@ using System.Reflection;
 
 namespace argparse
 {
-    public static class ArgumentParser
+    public class ArgumentParser : IArgumentParser
     {
-        public const char NoArgumentFlag = char.MinValue;
+        public static ArgumentParser Default { get; } = new ArgumentParser();
 
-        //new BasicArgumentParser();
-        // No such thing as scoped commands. Cannot have multiple 'multiple' positional arguments.
-        // Last positional argument can be the only one with 'multiple' set to true
-        // Can mix and match options throughout the command
+        private List<IArgumentCatagory> _argumentCatagories = new List<IArgumentCatagory>();
+        private List<IParameterCatagory> _paramterCatagories = new List<IParameterCatagory>();
+        private List<ICommandCatagory> _commandCatagories = new List<ICommandCatagory>();
 
-        // Usage: app [OPTIONS] FILE [FILE...]
-        //        app [OPTIONS] SOURCE DESTINATION
-        //        app [OPTIONS] SOURCE DESTINATION [DESTINATION...]
-        // app [opt] [source ] [ dest  ] [                            opt                      ] [  dest  ]
-        // app -f -v file1.txt file3.txt -vvpoD --long-name-argument --argument-with-value value file46.txt
-
-        //new ScopedArgumentParser();
-        // Only scoped arguments allowed. First positional must be global scope arguments, second positional must be scope name.
-        // After scope name all arguments are arguments for that scope.
-        // Cannot mix and match scope-name/global arguments.
-        // Can mix and match scope arguments. (After scope name is declared arguments after scope is a BasicArgumentParser)
-
-        // Usage: app [OPTIONS] SCOPE [BasicArgumentParser]
-
-        /// <summary>
-        /// Sets the mode for this argument parser
-        /// </summary>
-        public static ParserMode ParserMode { get; set; }
-
-        public static void AddArguments<T>()
-        {
-
-        }
-
-        public static void Add<TOptions, TArgument>(Expression<Func<TOptions, TArgument>> exp)
+        public IArgumentCatagory<TOptions> CreateArgumentCatagory<TOptions>()
             where TOptions : class, new()
-            where TArgument : struct
         {
-            IList<string> s;
+            var argumentCatagory = new ArgumentCatagory<TOptions>(this, typeof(TOptions).Name);
+            _argumentCatagories.Add(argumentCatagory);
+
+            return argumentCatagory;
         }
 
-        public static void AddPostiionalArgument<>
+        public TOptions GetArgumentCatagory<TOptions>()
+            where TOptions : class, new()
+        {
+            return (_argumentCatagories.SingleOrDefault(ac => ac is ArgumentCatagory<TOptions>) as ArgumentCatagory<TOptions>)
+                ?.CatagoryInstance;
+        }
 
-        public static IBasicArgumentParser ForScope(string scope)
+        public IParameterCatagory<TOptions> CreateParameterCatagory<TOptions>()
+            where TOptions : class, new()
+        {
+            IParameterCatagory<TOptions> parameterCatagory
+                = new ParameterCatagory<TOptions>(this, typeof(TOptions).Name);
+
+            _paramterCatagories.Add(parameterCatagory);
+            return parameterCatagory;
+        }
+
+        public TOptions GetParameterCatagory<TOptions>()
+            where TOptions : class, new()
+        {
+            return (_paramterCatagories.SingleOrDefault(pac => pac is ParameterCatagory<TOptions>) as ParameterCatagory<TOptions>)
+                ?.CatagoryInstance;
+        }
+
+        public ICommandCatagory<TOptions> CreateCommandCatagory<TOptions>()
+            where TOptions : class, new()
+        {
+            ICommandCatagory<TOptions> commandCatagory = new CommandCatagory<TOptions>(this, typeof(TOptions).Name);
+
+            _commandCatagories.Add(commandCatagory);
+            return commandCatagory;
+        }
+
+        public TOptions GetCommandCatagory<TOptions>()
+            where TOptions : class, new()
+        {
+            return (_commandCatagories.SingleOrDefault(cc => cc is CommandCatagory<TOptions>) as CommandCatagory<TOptions>)
+                ?.CatagoryInstance;
+        }
+
+        public void Parse(params string[] args)
+        {
+            args = ArgumentHelper.StripApplication(args);
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                string arg = args[i];
+                string nextArg = i + 1 < args.Length ? args[i + 1] : null;
+
+
+            }
+            
+        }
+
+        internal void CleanParse()
         {
 
         }
 
-        public static 
+        IEnumerable<string> AllArgumentNames()
+        {
+            foreach (IArgumentCatagory cat in _argumentCatagories)
+            {
+                foreach (IArgument arg in cat.Arguments)
+                {
+                    yield return arg.ArgumentName;
+                }
+            }
+        }
 
+        #region Static Stuff
+        
         public static readonly IReadOnlyCollection<Type> SupportedTypes = new Type[]
         {
             typeof(bool),
@@ -89,5 +129,7 @@ namespace argparse
             typeof(IEnumerable<DateTime>),
             typeof(IEnumerable<Enum>)
         };
+
+        #endregion
     }
 }

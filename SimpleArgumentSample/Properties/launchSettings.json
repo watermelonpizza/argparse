@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SimpleArgumentSample": {
+      "commandName": "Project",
+      "commandLineArgs": "-fhRsDflags     -h --help /h /help -l \"c:\\app\" --log \"c:\\app\" --log=\"c:/app\" --log=c:/app/log.txt /l:\"c:\\app\" /log \"c:/app\" /log=\"c:/app\""
+    }
+  }
+}

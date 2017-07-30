@@ -6,6 +6,8 @@ namespace argparse
 {
     public interface ICreateArgumentCatagory
     {
-        IBasicArgumentCatagory<TOptions> CreateArgumentCatagory<TOptions>(TOptions options);
+        IArgumentCatagory<TOptions> CreateArgumentCatagory<TOptions>() where TOptions : class, new();
+
+        TOptions GetArgumentCatagory<TOptions>() where TOptions : class, new();
     }
 }
