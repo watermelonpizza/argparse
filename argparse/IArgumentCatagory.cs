@@ -10,6 +10,8 @@ namespace argparse
         IEnumerable<IArgument> Arguments { get; }
 
         string CatagoryName { get; }
+
+        object CatagoryInstance { get; }
     }
 
     public interface IArgumentCatagory<TOptions> : IArgumentCatagory, IWithArgument<TOptions>

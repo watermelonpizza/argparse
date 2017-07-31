@@ -42,10 +42,5 @@ namespace argparse
 
             return arg;
         }
-
-        internal IParameter FindArgument(string name, char flag = ArgumentParser.NoArgumentFlag)
-        {
-            return _arguments.SingleOrDefault(arg => arg.ParameterName == name);
-        }
     }
 }

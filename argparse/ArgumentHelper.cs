@@ -19,25 +19,25 @@ namespace argparse
         Passthrough
     }
 
-    internal struct ArgumentDetails
-    {
-        public ArgumentType Type;
-        public string Name;
-        public char Flag;
-        public string Argument;
+    //internal struct ArgumentDetails
+    //{
+    //    public ArgumentType Type;
+    //    public string Name;
+    //    public char Flag;
+    //    public string Argument;
 
-        public ArgumentDetails(
-            ArgumentType type, 
-            string name = null,
-            char flag = ArgumentHelper.NoFlag,
-            string argument = null)
-        {
-            Type = type;
-            Name = name;
-            Flag = flag;
-            Argument = argument;
-        }
-    }
+    //    public ArgumentDetails(
+    //        ArgumentType type, 
+    //        string name = null,
+    //        char flag = ArgumentHelper.NoFlag,
+    //        string argument = null)
+    //    {
+    //        Type = type;
+    //        Name = name;
+    //        Flag = flag;
+    //        Argument = argument;
+    //    }
+    //}
 
     internal static class ArgumentHelper
     {
@@ -59,50 +59,27 @@ namespace argparse
             return args.Skip(1).ToArray();
         }
 
-
-        public static IEnumerable<ArgumentDetails> ParseArgument(string arg, string nextArg, IEnumerable<string> argNames, IEnumerable<char> argFlags, IEnumerable<string> commands)
-        {
-            ArgumentType type = GetArgumentType(arg, argNames, argFlags, commands);
-
-            switch (type)
-            {
-                case ArgumentType.Flag:
-                    return new List<ArgumentDetails> { new ArgumentDetails(type, flag: arg[0])}
-                case ArgumentType.FlagWithArgument:
-                    break;
-                case ArgumentType.Flags:
-                    break;
-                case ArgumentType.FlagsWithUnknown:
-                    break;
-                case ArgumentType.Name:
-                    break;
-                case ArgumentType.NameWithArgument:
-                    break;
-                case ArgumentType.Command:
-                    break;
-                case ArgumentType.Passthrough:
-                    break;
-                default:
-                case ArgumentType.None:
-                    break;
-            }
-        }
-
         public static ArgumentType GetArgumentType(string arg, IEnumerable<string> argNames, IEnumerable<char> argFlags, IEnumerable<string> commands)
         {
             if (IsArgument(arg))
             {
-                if (arg.StartsWith(WindowsArgumentPrefix))
+                var strippedArgument = StripArgument(arg);
+
+                if (strippedArgument.prefix == WindowsArgumentPrefix)
                 {
-                    return GetWindowsArgumentType(arg, argNames, argFlags);
+                    return GetWindowsArgumentType(strippedArgument.argument, argNames, argFlags);
                 }
-                else if (arg.StartsWith(NamePrefix))
+                else if (strippedArgument.prefix == NamePrefix && string.IsNullOrEmpty(strippedArgument.argument))
                 {
-                    return GetNameType(arg, argNames);
+                    return ArgumentType.Passthrough;
                 }
-                else if (arg.StartsWith(FlagPrefix))
+                else if (strippedArgument.prefix == NamePrefix)
                 {
-                    return GetFlagType(arg, argFlags);
+                    return GetNameType(strippedArgument.argument, argNames);
+                }
+                else if (strippedArgument.prefix == FlagPrefix)
+                {
+                    return GetFlagType(strippedArgument.argument, argFlags);
                 }
             }
             else if (commands.Contains(arg))
@@ -115,10 +92,31 @@ namespace argparse
 
         public static bool IsArgument(string arg) => ArgumentPrefixes.Any(prefix => arg.StartsWith(prefix));
 
+        public static (string prefix, string argument) StripArgument(string arg)
+        {
+            if (arg.StartsWith(WindowsArgumentPrefix))
+            {
+                return (WindowsArgumentPrefix, arg.Substring(WindowsArgumentPrefix.Length));
+            }
+            else if (arg == NamePrefix)
+            {
+                return (NamePrefix, string.Empty);
+            }
+            else if (arg.StartsWith(NamePrefix))
+            {
+                return (NamePrefix, arg.Substring(NamePrefix.Length));
+            }
+            else if (arg.StartsWith(FlagPrefix))
+            {
+                return (FlagPrefix, arg.Substring(FlagPrefix.Length));
+            }
+
+            return (null, arg);
+        }
+
         public static ArgumentType GetWindowsArgumentType(string arg, IEnumerable<string> argNames, IEnumerable<char> argFlags)
         {
             ArgumentType result = ArgumentType.None;
-            string strippedArgument = arg.Substring(WindowsArgumentPrefix.Length);
 
             result = GetNameType(arg, argNames);
 
@@ -130,21 +128,16 @@ namespace argparse
 
         public static ArgumentType GetNameType(string arg, IEnumerable<string> argNames)
         {
-            if (arg == NamePrefix)
-                return ArgumentType.Passthrough;
-
-            string strippedArgument = arg.Substring(NamePrefix.Length);
-
             foreach (string name in argNames)
             {
-                if (strippedArgument.StartsWith(name))
+                if (arg.StartsWith(name))
                 {
-                    if (strippedArgument.Length == name.Length)
+                    if (arg.Length == name.Length)
                     {
                         return ArgumentType.Name;
                     }
-                    else if (strippedArgument[name.Length] == WindowsDeliminator ||
-                        strippedArgument[name.Length] == Deliminator)
+                    else if (arg[name.Length] == WindowsDeliminator ||
+                        arg[name.Length] == Deliminator)
                     {
                         return ArgumentType.NameWithArgument;
                     }
@@ -156,15 +149,13 @@ namespace argparse
 
         public static ArgumentType GetFlagType(string arg, IEnumerable<char> argFlags)
         {
-            string strippedArgument = arg.Substring(FlagPrefix.Length);
-
-            if (strippedArgument.Length > 1)
+            if (arg.Length > 1)
             {
-                if (Regex.IsMatch(strippedArgument, FlagMatchPattern))
+                if (Regex.IsMatch(arg, FlagMatchPattern))
                 {
                     ArgumentType type = ArgumentType.Flags;
 
-                    foreach (char flag in strippedArgument)
+                    foreach (char flag in arg)
                     {
                         if (!argFlags.Contains(flag))
                             type = ArgumentType.FlagsWithUnknown;
@@ -174,21 +165,21 @@ namespace argparse
                 }
                 else
                 {
-                    char flag = strippedArgument[0];
+                    char flag = arg[0];
 
                     if (argFlags.Contains(flag))
                     {
-                        if (strippedArgument[1] == WindowsDeliminator ||
-                                strippedArgument[1] == Deliminator)
+                        if (arg[1] == WindowsDeliminator ||
+                                arg[1] == Deliminator)
                         {
                             return ArgumentType.FlagWithArgument;
                         }
                     }
                 }
             }
-            else if (strippedArgument.Length == 1)
+            else if (arg.Length == 1)
             {
-                char flag = strippedArgument[0];
+                char flag = arg[0];
 
                 if (argFlags.Contains(flag))
                 {

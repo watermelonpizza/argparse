@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -73,14 +74,103 @@ namespace argparse
                 string arg = args[i];
                 string nextArg = i + 1 < args.Length ? args[i + 1] : null;
 
+                ArgumentType type = ArgumentHelper.GetArgumentType(arg, AllArgumentNames(), AllArgumentFlags(), AllCommands());
 
+                var strippedArgument = ArgumentHelper.StripArgument(arg);
+
+                switch (type)
+                {
+                    case ArgumentType.Flag:
+                        foreach (IArgumentCatagory cat in _argumentCatagories)
+                        {
+                            IArgument flag = cat.Arguments.SingleOrDefault(a => a.ArgumentFlag == strippedArgument.argument[0]);
+
+                            if (flag != null)
+                            {
+                                if (flag.IsCountable)
+                                {
+                                    uint count = Convert.ToUInt32(flag.Property.GetValue(cat.CatagoryInstance)) + 1;
+
+                                    flag.Property.SetValue(cat.CatagoryInstance, Convert.ChangeType(count, flag.Property.PropertyType));
+                                    break;
+                                }
+                                else if (flag.IsMultiple)
+                                {
+                                    // TODO: Throw exception. Need argument.
+                                }
+                                else
+                                {
+                                    flag.Property.SetValue(cat.CatagoryInstance, true);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        break;
+                    case ArgumentType.FlagWithArgument:
+                        foreach (IArgumentCatagory cat in _argumentCatagories)
+                        {
+                            IArgument flag = cat.Arguments.SingleOrDefault(a => a.ArgumentFlag == strippedArgument.argument[0]);
+
+                            if (flag != null)
+                            {
+                                if (flag.IsCountable)
+                                {
+                                    uint count = Convert.ToUInt32(flag.Property.GetValue(cat.CatagoryInstance)) + 1;
+
+                                    flag.Property.SetValue(cat.CatagoryInstance, Convert.ChangeType(count, flag.Property.PropertyType));
+                                    break;
+                                }
+                                else if (flag.IsMultiple)
+                                {
+                                    // TODO: Throw exception. Need argument.
+                                }
+                                else
+                                {
+                                    flag.Property.SetValue(cat.CatagoryInstance, true);
+                                    break;
+                                }
+                            }
+                        }
+
+                        break;
+
+                        new List<ArgumentDetails> { new ArgumentDetails(type, flag: strippedArgument.argument[0], argument: strippedArgument.argument.Substring(2)) };
+                    case ArgumentType.Flags:
+                        List<ArgumentDetails> flags = new List<ArgumentDetails>();
+                        foreach (char flag in strippedArgument.argument)
+                        {
+                            flags.Add(new ArgumentDetails(type, flag: flag));
+                        }
+
+                        return flags;
+                    case ArgumentType.FlagsWithUnknown:
+                        List<ArgumentDetails> flagsWithUnknown = new List<ArgumentDetails>();
+                        foreach (char flag in strippedArgument.argument)
+                        {
+                            flagsWithUnknown.Add(new ArgumentDetails(type, flag: flag));
+                        }
+
+                        return flagsWithUnknown;
+                    case ArgumentType.Name:
+                        return new List<ArgumentDetails> { new ArgumentDetails(type, name: strippedArgument.argument) };
+                    case ArgumentType.NameWithArgument:
+                        string argName = argNames.Single(name => strippedArgument.argument.StartsWith(name));
+
+                        return new List<ArgumentDetails>
+                    {
+                        new ArgumentDetails(type, name: strippedArgument.argument.Substring(0, argName.Length), argument: strippedArgument.argument.Substring(argName.Length + 1))
+                    };
+                    case ArgumentType.Command:
+                        return new List<ArgumentDetails> { new ArgumentDetails(type, name: strippedArgument.argument) };
+                    case ArgumentType.Passthrough:
+                        return new List<ArgumentDetails> { new ArgumentDetails(type, argument: strippedArgument.argument) };
+                    case ArgumentType.None:
+                    default:
+                        return new List<ArgumentDetails>();
+                }
             }
             
-        }
-
-        internal void CleanParse()
-        {
-
         }
 
         IEnumerable<string> AllArgumentNames()
@@ -94,8 +184,30 @@ namespace argparse
             }
         }
 
+        IEnumerable<char> AllArgumentFlags()
+        {
+            foreach (IArgumentCatagory cat in _argumentCatagories)
+            {
+                foreach (IArgument arg in cat.Arguments)
+                {
+                    yield return arg.ArgumentFlag;
+                }
+            }
+        }
+
+        IEnumerable<string> AllCommands()
+        {
+            foreach (ICommandCatagory cat in _commandCatagories)
+            {
+                foreach (ICommand command in cat.Commands)
+                {
+                    yield return command.CommandName;
+                }
+            }
+        }
+
         #region Static Stuff
-        
+
         public static readonly IReadOnlyCollection<Type> SupportedTypes = new Type[]
         {
             typeof(bool),

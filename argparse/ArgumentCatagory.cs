@@ -18,7 +18,7 @@ namespace argparse
 
         public string CatagoryName { get; private set; }
 
-        internal TOptions CatagoryInstance { get; } = new TOptions();
+        public object CatagoryInstance { get; } = new TOptions();
 
         public ArgumentCatagory(ICreateArgumentCatagory catagoryCreator, string name)
         {
@@ -41,12 +41,6 @@ namespace argparse
             _arguments.Add(arg);
 
             return arg;
-        }
-
-        internal IArgument FindArgument(string name, char flag = ArgumentParser.NoArgumentFlag)
-        {
-            return _arguments.SingleOrDefault(arg => arg.ArgumentName == name) ?? 
-                _arguments.SingleOrDefault(arg => arg.ArgumentFlag == flag);
         }
     }
 }
