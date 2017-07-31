@@ -28,7 +28,7 @@ namespace argparse
         public TOptions GetArgumentCatagory<TOptions>()
             where TOptions : class, new()
         {
-            return (_argumentCatagories.SingleOrDefault(ac => ac is ArgumentCatagory<TOptions>) as ArgumentCatagory<TOptions>)
+            return (TOptions)(_argumentCatagories.SingleOrDefault(ac => ac is ArgumentCatagory<TOptions>) as ArgumentCatagory<TOptions>)
                 ?.CatagoryInstance;
         }
 
@@ -127,7 +127,7 @@ namespace argparse
                                 }
                                 else
                                 {
-                                    flag.Property.SetValue(cat.CatagoryInstance, true);
+                                    flag.Property.SetValue(cat.CatagoryInstance, strippedArgument.argument);
                                     break;
                                 }
                             }

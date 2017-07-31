@@ -11,6 +11,8 @@ namespace argparse
 
         char ArgumentFlag { get; }
 
+        Type ArgumentType { get; }
+
         bool IsRequired { get; }
 
         bool IsCountable { get; }

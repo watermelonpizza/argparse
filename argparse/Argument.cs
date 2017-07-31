@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -25,6 +26,8 @@ namespace argparse
         /// Does not require a prefix (i.e -, -- or / etc.).
         /// </summary>
         public string ArgumentName { get; private set; }
+
+        public Type ArgumentType { get; }
 
         /// <summary>
         /// The help documentation for the argument
@@ -54,7 +57,7 @@ namespace argparse
         /// The argument type <see cref="TArgument"/> must be <see cref="IEnumerable{T}"/>.
         /// This is set implicitlely based on the type. You cannot set this manually. 
         /// </summary>
-        public bool IsMultiple { get; private set; }
+        public bool IsMultiple { get; }
         
         /// <summary>
         /// The property info of the argument
@@ -75,6 +78,16 @@ namespace argparse
             Property = property;
 
             Name(property.Name);
+
+            if (typeof(TArgument) is IEnumerable)
+            {
+                ArgumentType = typeof(TArgument).GenericTypeArguments[0];
+                IsMultiple = true;
+            }
+            else
+            {
+                ArgumentType = typeof(TArgument);
+            }
         }
 
         public IArgument<TOptions, TArgument> Countable()

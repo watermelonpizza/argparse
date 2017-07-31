@@ -11,6 +11,8 @@ namespace argparse
 
         uint ParameterPosition { get; }
 
+        Type ParameterType { get; }
+
         bool IsRequired { get; }
 
         bool IsMultiple { get; }

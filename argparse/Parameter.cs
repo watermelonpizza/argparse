@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,11 +15,13 @@ namespace argparse
 
         public string ParameterName { get; private set; }
 
+        public Type ParameterType { get; }
+
         public uint ParameterPosition { get; private set; }
 
         public bool IsRequired { get; private set; }
 
-        public bool IsMultiple { get; private set; }
+        public bool IsMultiple { get; }
 
         public string ParamterHelp { get; private set; }
 
@@ -38,6 +41,16 @@ namespace argparse
             Property = property;
 
             Name(property.Name);
+
+            if (typeof(TArgument) is IEnumerable)
+            {
+                ParameterType = typeof(TArgument).GenericTypeArguments[0];
+                IsMultiple = true;
+            }
+            else
+            {
+                ParameterType = typeof(TArgument);
+            }
         }
 
         public IParameter<TArgumentOptions, TArgument> Help(string help)
