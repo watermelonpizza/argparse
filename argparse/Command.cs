@@ -6,7 +6,7 @@ using System.Text;
 
 namespace argparse
 {
-    public class Command<TOptions> : ICommand<TOptions>
+    internal class Command<TOptions> : ICommand<TOptions>, IProperty
         where TOptions : class, new()
     {
         private ICommandCatagory<TOptions> _currentCatagory;
@@ -25,6 +25,23 @@ namespace argparse
             Property = property;
 
             Name(property.Name);
+        }
+
+        public void AddIfMultiple(object obj)
+        {
+            throw new InvalidOperationException("How did you get here? This shouldn't happen. Commands can only be bool or IArgumentParser type");
+        }
+
+        public void SetValue(object obj)
+        {
+            if (obj?.GetType() != Property.PropertyType) { } // TODO: Throw exception if different types
+
+            Property.SetValue(_currentCatagory.CatagoryInstance, obj);
+        }
+
+        public object GetValue()
+        {
+            return Property.GetValue(_currentCatagory.CatagoryInstance);
         }
 
         public ICommand<TOptions> Help(string help)

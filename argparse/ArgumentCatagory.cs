@@ -8,7 +8,7 @@ using System.Text;
 
 namespace argparse
 {
-    public class ArgumentCatagory<TOptions> : IArgumentCatagory<TOptions>
+    internal class ArgumentCatagory<TOptions> : IArgumentCatagory<TOptions>
         where TOptions : new()
     {
         private ICreateArgumentCatagory _catagoryCreator;

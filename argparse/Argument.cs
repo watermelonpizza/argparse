@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace argparse
 {
-    public class Argument<TOptions, TArgument> : IArgument<TOptions, TArgument>
+    internal class Argument<TOptions, TArgument> : IArgument<TOptions, TArgument>, IProperty
     {
         private IArgumentCatagory<TOptions> _currentCatagory;
         private ICreateArgumentCatagory _catagoryCreator;
@@ -88,6 +88,59 @@ namespace argparse
             {
                 ArgumentType = typeof(TArgument);
             }
+        }
+
+        public void AddIfMultiple(object obj)
+        {
+            if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
+            
+            if (IsMultiple)
+            {
+                try
+                {
+                    // If the property is enumerable and it's not null cast to a list, add the new value and set it back
+                    if (Property.GetValue(_currentCatagory.CatagoryInstance) is IEnumerable<TArgument> propValue)
+                    {
+                        if (propValue != null)
+                        {
+                            IList<TArgument> propListValue = propValue.ToList();
+                            propListValue.Add((TArgument)obj);
+                            Property.SetValue(_currentCatagory.CatagoryInstance, propListValue);
+                        }
+                        // Otherwise create a new list and set the property
+                        else
+                        {
+                            Property.SetValue(
+                                _currentCatagory.CatagoryInstance,
+                                new List<TArgument>
+                                {
+                                     (TArgument)obj
+                                });
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            else
+            {
+                // TODO: Throw exception why cannot add to non multiple
+            }
+        }
+
+        public void SetValue(object obj)
+        {
+            if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
+
+            Property.SetValue(_currentCatagory.CatagoryInstance, obj);
+        }
+
+        public object GetValue()
+        {
+            return Property.GetValue(_currentCatagory.CatagoryInstance);
         }
 
         public IArgument<TOptions, TArgument> Countable()

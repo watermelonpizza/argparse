@@ -8,7 +8,7 @@ using System.Text;
 
 namespace argparse
 {
-    public class Parameter<TArgumentOptions, TArgument> : IParameter<TArgumentOptions, TArgument>
+    internal class Parameter<TArgumentOptions, TArgument> : IParameter<TArgumentOptions, TArgument>, IProperty
     {
         private IParameterCatagory<TArgumentOptions> _currentCatagory;
         private ICreateParameterCatagory _catagoryCreator;
@@ -17,7 +17,7 @@ namespace argparse
 
         public Type ParameterType { get; }
 
-        public uint ParameterPosition { get; private set; }
+        public uint Position { get; }
 
         public bool IsRequired { get; private set; }
 
@@ -27,7 +27,7 @@ namespace argparse
 
         public PropertyInfo Property { get; }
 
-        public Parameter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property)
+        public Parameter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property, uint position)
         {
             if (!ArgumentParser.SupportedTypes.Contains(typeof(TArgument)))
             {
@@ -51,6 +51,61 @@ namespace argparse
             {
                 ParameterType = typeof(TArgument);
             }
+
+            Position = position;
+        }
+
+        public void AddIfMultiple(object obj)
+        {
+            if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
+
+            if (IsMultiple)
+            {
+                try
+                {
+                    // If the property is enumerable and it's not null cast to a list, add the new value and set it back
+                    if (Property.GetValue(_currentCatagory.CatagoryInstance) is IEnumerable<TArgument> propValue)
+                    {
+                        if (propValue != null)
+                        {
+                            IList<TArgument> propListValue = propValue.ToList();
+                            propListValue.Add((TArgument)obj);
+                            Property.SetValue(_currentCatagory.CatagoryInstance, propListValue);
+                        }
+                        // Otherwise create a new list and set the property
+                        else
+                        {
+                            Property.SetValue(
+                                _currentCatagory.CatagoryInstance,
+                                new List<TArgument>
+                                {
+                                     (TArgument)obj
+                                });
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            else
+            {
+                // TODO: Throw exception why cannot add to non multiple
+            }
+        }
+
+        public void SetValue(object obj)
+        {
+            if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
+
+            Property.SetValue(_currentCatagory.CatagoryInstance, obj);
+        }
+
+        public object GetValue()
+        {
+            return Property.GetValue(_currentCatagory.CatagoryInstance);
         }
 
         public IParameter<TArgumentOptions, TArgument> Help(string help)
@@ -67,13 +122,6 @@ namespace argparse
             return this;
         }
 
-        public IParameter<TArgumentOptions, TArgument> Position(uint position)
-        {
-            ParameterPosition = position;
-
-            return this;
-        }
-
         public IParameter<TArgumentOptions, TArgument> Required()
         {
             IsRequired = true;
@@ -81,9 +129,9 @@ namespace argparse
             return this;
         }
 
-        public IParameter<TArgumentOptions, TArgument1> WithParameter<TArgument1>(Expression<Func<TArgumentOptions, TArgument1>> argument)
+        public IParameter<TArgumentOptions, TArgument1> WithParameter<TArgument1>(Expression<Func<TArgumentOptions, TArgument1>> argument, uint position)
         {
-            return _currentCatagory.WithParameter(argument);
+            return _currentCatagory.WithParameter(argument, position);
         }
 
         public IParameterCatagory<TOptions> CreateParameterCatagory<TOptions>()

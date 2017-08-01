@@ -6,5 +6,6 @@ namespace argparse
 {
     public interface IArgumentParser : ICreateParameterCatagory, ICreateArgumentCatagory, ICreateCommandCatagory
     {
+        string[] Passthrough { get; }
     }
 }

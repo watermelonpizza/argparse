@@ -6,7 +6,7 @@ using System.Text;
 
 namespace argparse
 {
-    public class CommandCatagory<TOptions> : ICommandCatagory<TOptions>
+    internal class CommandCatagory<TOptions> : ICommandCatagory<TOptions>
         where TOptions : class, new()
     {
         private ICreateCommandCatagory _catagoryCreator;
@@ -16,7 +16,7 @@ namespace argparse
 
         public string CommandCatagoryName { get; private set; }
 
-        internal TOptions CatagoryInstance { get; } = new TOptions();
+        public object CatagoryInstance { get; } = new TOptions();
 
         public CommandCatagory(ICreateCommandCatagory catagoryCreator, string name)
         {

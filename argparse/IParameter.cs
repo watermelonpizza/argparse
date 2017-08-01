@@ -9,7 +9,7 @@ namespace argparse
     {
         string ParameterName { get; }
 
-        uint ParameterPosition { get; }
+        uint Position { get; }
 
         Type ParameterType { get; }
 
@@ -25,8 +25,6 @@ namespace argparse
     public interface IParameter<TArgumentOptions, TArgument> : IParameter, IWithParameter<TArgumentOptions>, ICreateParameterCatagory
     {
         IParameter<TArgumentOptions, TArgument> Name(string name);
-
-        IParameter<TArgumentOptions, TArgument> Position(uint position);
 
         IParameter<TArgumentOptions, TArgument> Required();
 

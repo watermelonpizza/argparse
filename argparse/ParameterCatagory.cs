@@ -8,7 +8,7 @@ using System.Text;
 
 namespace argparse
 {
-    public class ParameterCatagory<TArgumentOptions> : IParameterCatagory<TArgumentOptions>
+    internal class ParameterCatagory<TArgumentOptions> : IParameterCatagory<TArgumentOptions>
         where TArgumentOptions : new()
     {
         private ICreateParameterCatagory _catagoryCreator;
@@ -18,7 +18,7 @@ namespace argparse
 
         public string ParameterCatagoryName { get; private set; }
 
-        internal TArgumentOptions CatagoryInstance { get; } = new TArgumentOptions();
+        public object CatagoryInstance { get; } = new TArgumentOptions();
 
         public ParameterCatagory(ICreateParameterCatagory catagoryCreator, string name)
         {
@@ -33,11 +33,11 @@ namespace argparse
             return this;
         }
 
-        public IParameter<TArgumentOptions, TArgument> WithParameter<TArgument>(Expression<Func<TArgumentOptions, TArgument>> argument)
+        public IParameter<TArgumentOptions, TArgument> WithParameter<TArgument>(Expression<Func<TArgumentOptions, TArgument>> argument, uint position)
         {
             PropertyInfo property = (argument.Body as MemberExpression).Member as PropertyInfo;
 
-            var arg = new Parameter<TArgumentOptions, TArgument>(_catagoryCreator, this, property);
+            var arg = new Parameter<TArgumentOptions, TArgument>(_catagoryCreator, this, property, position);
             _arguments.Add(arg);
 
             return arg;
