@@ -103,5 +103,13 @@ namespace argparse.UnitTests
 
             Assert.IsInstanceOfType(catagory.WithArgument(x => x.Boolean), typeof(IArgument<BasicOptions, bool>));
         }
+
+        [TestMethod]
+        public void ArgumentCatagoryWithArgumentOnSamePropertyThrowArgumentException()
+        {
+            IArgumentCatagory<BasicOptions> catagory = ArgumentParser.Default.CreateArgumentCatagory<BasicOptions>();
+
+            Assert.ThrowsException<ArgumentException>(() => catagory.WithArgument(x => x.Boolean).WithArgument(x => x.Boolean));
+        }
     }
 }

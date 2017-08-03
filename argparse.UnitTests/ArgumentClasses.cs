@@ -88,6 +88,25 @@ namespace argparse.UnitTests
         public IEnumerable<decimal> Decimal { get; set; }
     }
 
+    public class MultiOptionsEnumerableType
+    {
+        public ICollection<int> ICollection { get; set; }
+        public IReadOnlyCollection<int> IReadOnlyCollection { get; set; }
+        public IList<int> IList { get; set; }
+        public List<int> List { get; set; }
+        public IDictionary<int, int> IDictionary { get; set; }
+        public Dictionary<int, int> Dictionary { get; set; }
+    }
+
+    public class PropertyTypes
+    {
+        public int GetAndSet { get; set; }
+        public int GetOnly { get; }
+        public int SetOnly { set { } }
+        public int GetPrivateSet { get; private set; }
+        public int PrivateGetSet { private get; set; }
+    }
+
     public class Commands
     {
         public bool FlagCommand { get; set; }

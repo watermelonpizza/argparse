@@ -69,8 +69,15 @@ namespace argparse
             if (!ArgumentParser.SupportedTypes.Contains(typeof(TArgument)))
             {
                 throw new ArgumentException(
-                    $"{typeof(TArgument).Name} is not supported as an argument type for {property.Name}. Please use only one of the supported types as found in {nameof(ArgumentParser.SupportedTypes)}",
+                    $"{typeof(TArgument).Name} is not supported as an argument type for '{property.Name}' on catagory '{typeof(TOptions).Name}'. Please use only one of the supported types as found in {nameof(ArgumentParser.SupportedTypes)}",
                     nameof(TArgument));
+            }
+
+            if (property.GetMethod == null || property.SetMethod == null)
+            {
+                throw new ArgumentException(
+                    $"Property '{property.Name}' must have both a get and set accessor on catagory '{typeof(TOptions).Name}'.",
+                    nameof(property));
             }
 
             _catagoryCreator = catagoryCreator;
@@ -204,14 +211,14 @@ namespace argparse
 
         public IArgument<TOptions, TArgument> Name(string name)
         {
-            if (name == null || !Regex.IsMatch(name, ArgumentHelper.NameMatchPattern))
+            if (!string.IsNullOrEmpty(name) || !Regex.IsMatch(name, ArgumentHelper.NameMatchPattern))
             {
                 throw new ArgumentException(
                     $"{nameof(name)} must only be compromised of letters, numbers or hyphens, must be at least two characters and must start with a letter. Match pattern: { ArgumentHelper.NameMatchPattern }",
                     nameof(name));
             }
 
-            ArgumentName = name;
+            ArgumentName = name; // TODO: Parse name
 
             return this;
         }
