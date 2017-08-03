@@ -42,7 +42,7 @@ namespace argparse
     internal static class ArgumentHelper
     {
         internal const string FlagMatchPattern = "^[a-zA-Z0-9]$";
-        internal const string NameMatchPattern = "^[a-zA-Z][a-zA-Z0-9-]+$";
+        internal const string NameMatchPattern = "^[a-z0-9][a-z0-9-]+$";
         internal const char NoFlag = char.MinValue;
 
         internal const string WindowsArgumentPrefix = "/";

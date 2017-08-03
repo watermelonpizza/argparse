@@ -31,8 +31,9 @@ namespace argparse
         public TOptions GetArgumentCatagory<TOptions>()
             where TOptions : class, new()
         {
-            return (TOptions)(_argumentCatagories.SingleOrDefault(ac => ac is ArgumentCatagory<TOptions>) as ArgumentCatagory<TOptions>)
-                ?.CatagoryInstance;
+            return (TOptions)
+                (_argumentCatagories.SingleOrDefault(ac => ac is ArgumentCatagory<TOptions>) as ArgumentCatagory<TOptions>)
+                    ?.CatagoryInstance;
         }
 
         public IParameterCatagory<TOptions> CreateParameterCatagory<TOptions>()
@@ -48,8 +49,9 @@ namespace argparse
         public TOptions GetParameterCatagory<TOptions>()
             where TOptions : class, new()
         {
-            return (TOptions)(_paramterCatagories.SingleOrDefault(pac => pac is ParameterCatagory<TOptions>) as ParameterCatagory<TOptions>)
-                ?.CatagoryInstance;
+            return (TOptions)
+                (_paramterCatagories.SingleOrDefault(pac => pac is ParameterCatagory<TOptions>) as ParameterCatagory<TOptions>)
+                    ?.CatagoryInstance;
         }
 
         public ICommandCatagory<TOptions> CreateCommandCatagory<TOptions>()
@@ -64,8 +66,9 @@ namespace argparse
         public TOptions GetCommandCatagory<TOptions>()
             where TOptions : class, new()
         {
-            return (TOptions)(_commandCatagories.SingleOrDefault(cc => cc is CommandCatagory<TOptions>) as CommandCatagory<TOptions>)
-                ?.CatagoryInstance;
+            return (TOptions)
+                (_commandCatagories.SingleOrDefault(cc => cc is CommandCatagory<TOptions>) as CommandCatagory<TOptions>)
+                    ?.CatagoryInstance;
         }
 
         public void WriteHelp()

@@ -14,19 +14,19 @@ namespace argparse
 
         public IEnumerable<ICommand> Commands => _commands;
 
-        public string CommandCatagoryName { get; private set; }
+        public string CatagoryName { get; private set; }
 
         public object CatagoryInstance { get; } = new TOptions();
 
         public CommandCatagory(ICreateCommandCatagory catagoryCreator, string name)
         {
             _catagoryCreator = catagoryCreator;
-            CommandCatagoryName = name;
+            CatagoryName = name;
         }
 
         public ICommandCatagory<TOptions> Name(string name)
         {
-            CommandCatagoryName = name;
+            CatagoryName = name;
 
             return this;
         }

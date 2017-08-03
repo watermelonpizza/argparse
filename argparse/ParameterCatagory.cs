@@ -16,19 +16,19 @@ namespace argparse
 
         public IEnumerable<IParameter> Parameters => _arguments;
 
-        public string ParameterCatagoryName { get; private set; }
+        public string CatagoryName { get; private set; }
 
         public object CatagoryInstance { get; } = new TArgumentOptions();
 
         public ParameterCatagory(ICreateParameterCatagory catagoryCreator, string name)
         {
             _catagoryCreator = catagoryCreator;
-            ParameterCatagoryName = name;
+            CatagoryName = name;
         }
 
         public IParameterCatagory<TArgumentOptions> Name(string name)
         {
-            ParameterCatagoryName = name;
+            CatagoryName = name;
 
             return this;
         }

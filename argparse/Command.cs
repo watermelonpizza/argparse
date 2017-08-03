@@ -36,12 +36,14 @@ namespace argparse
         {
             if (obj?.GetType() != Property.PropertyType) { } // TODO: Throw exception if different types
 
-            Property.SetValue(_currentCatagory.CatagoryInstance, obj);
+            ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+            Property.SetValue(instance.CatagoryInstance, obj);
         }
 
         public object GetValue()
         {
-            return Property.GetValue(_currentCatagory.CatagoryInstance);
+            ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+            return Property.GetValue(instance.CatagoryInstance);
         }
 
         public ICommand<TOptions> Help(string help)
@@ -68,13 +70,13 @@ namespace argparse
             return _currentCatagory.WithCommand(command, parser);
         }
 
-        public ICommandCatagory<TOptions1> CreateCommandCatagory<TOptions1>() 
+        public ICommandCatagory<TOptions1> CreateCommandCatagory<TOptions1>()
             where TOptions1 : class, new()
         {
             return _catagoryCreator.CreateCommandCatagory<TOptions1>();
         }
 
-        public TOptions1 GetCommandCatagory<TOptions1>() 
+        public TOptions1 GetCommandCatagory<TOptions1>()
             where TOptions1 : class, new()
         {
             return _catagoryCreator.GetCommandCatagory<TOptions1>();

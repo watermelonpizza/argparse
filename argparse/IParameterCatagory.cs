@@ -8,9 +8,7 @@ namespace argparse
     {
         IEnumerable<IParameter> Parameters { get; }
 
-        string ParameterCatagoryName { get; }
-
-        object CatagoryInstance { get; }
+        string CatagoryName { get; }
     }
 
     public interface IParameterCatagory<TArgumentOptions> : IParameterCatagory, IWithParameter<TArgumentOptions>

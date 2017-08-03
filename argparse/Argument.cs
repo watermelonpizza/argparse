@@ -58,7 +58,7 @@ namespace argparse
         /// This is set implicitlely based on the type. You cannot set this manually. 
         /// </summary>
         public bool IsMultiple { get; }
-        
+
         /// <summary>
         /// The property info of the argument
         /// </summary>
@@ -93,25 +93,27 @@ namespace argparse
         public void AddIfMultiple(object obj)
         {
             if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
-            
+
             if (IsMultiple)
             {
                 try
                 {
+                    ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+
                     // If the property is enumerable and it's not null cast to a list, add the new value and set it back
-                    if (Property.GetValue(_currentCatagory.CatagoryInstance) is IEnumerable<TArgument> propValue)
+                    if (Property.GetValue(instance.CatagoryInstance) is IEnumerable<TArgument> propValue)
                     {
                         if (propValue != null)
                         {
                             IList<TArgument> propListValue = propValue.ToList();
                             propListValue.Add((TArgument)obj);
-                            Property.SetValue(_currentCatagory.CatagoryInstance, propListValue);
+                            Property.SetValue(instance.CatagoryInstance, propListValue);
                         }
                         // Otherwise create a new list and set the property
                         else
                         {
                             Property.SetValue(
-                                _currentCatagory.CatagoryInstance,
+                                instance.CatagoryInstance,
                                 new List<TArgument>
                                 {
                                      (TArgument)obj
@@ -135,12 +137,14 @@ namespace argparse
         {
             if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
 
-            Property.SetValue(_currentCatagory.CatagoryInstance, obj);
+            ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+            Property.SetValue(instance.CatagoryInstance, obj);
         }
 
         public object GetValue()
         {
-            return Property.GetValue(_currentCatagory.CatagoryInstance);
+            ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+            return Property.GetValue(instance.CatagoryInstance);
         }
 
         public IArgument<TOptions, TArgument> Countable()

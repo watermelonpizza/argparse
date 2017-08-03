@@ -9,9 +9,7 @@ namespace argparse
     {
         IEnumerable<ICommand> Commands { get; }
 
-        string CommandCatagoryName { get; }
-
-        object CatagoryInstance { get; }
+        string CatagoryName { get; }
     }
 
     public interface ICommandCatagory<TOptions> : ICommandCatagory, IWithCommand<TOptions>

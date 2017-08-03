@@ -189,5 +189,106 @@ namespace argparse.UnitTests
             Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<Enum>)));
         }
 
+        [TestMethod]
+        public void DefaultArgumentParserIsNotNull()
+        {
+            Assert.IsNotNull(ArgumentParser.Default);
+        }
+
+        [TestMethod]
+        public void ArgumentParserArgumentCreateCatagoryIsNotNull()
+        {
+            Assert.IsNotNull(ArgumentParser.Default.CreateArgumentCatagory<NoOptions>());
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateArgumentCatagoryIsOfTypeIArgumentCatagory()
+        {
+            Assert.IsInstanceOfType(ArgumentParser.Default.CreateArgumentCatagory<NoOptions>(), typeof(IArgumentCatagory));
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateArgumentCatagoryIsOfTypeIArgumentCatagory_T_()
+        {
+            Assert.IsInstanceOfType(ArgumentParser.Default.CreateArgumentCatagory<NoOptions>(), typeof(IArgumentCatagory<NoOptions>));
+        }
+
+        [TestMethod]
+        public void ArgumentParserGetArgumentCatagoryIsNotNull()
+        {
+            ArgumentParser.Default.CreateArgumentCatagory<NoOptions>();
+            Assert.IsNotNull(ArgumentParser.Default.GetArgumentCatagory<NoOptions>());
+        }
+
+        [TestMethod]
+        public void ArgumentParserGetArgumentCatagoryIsSameTypeAs_TOptions()
+        {
+            ArgumentParser.Default.CreateArgumentCatagory<NoOptions>();
+            Assert.IsInstanceOfType(ArgumentParser.Default.GetArgumentCatagory<NoOptions>(), typeof(NoOptions));
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateCommandCatagoryIsNotNull()
+        {
+            Assert.IsNotNull(ArgumentParser.Default.CreateCommandCatagory<NoOptions>());
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateCommandCatagoryIsOfTypeICommandCatagory()
+        {
+            Assert.IsInstanceOfType(ArgumentParser.Default.CreateCommandCatagory<NoOptions>(), typeof(ICommandCatagory));
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateCommandCatagoryIsOfTypeICommandCatagory_T_()
+        {
+            Assert.IsInstanceOfType(ArgumentParser.Default.CreateCommandCatagory<NoOptions>(), typeof(ICommandCatagory<NoOptions>));
+        }
+
+        [TestMethod]
+        public void ArgumentParserGetCommandCatagoryIsNotNull()
+        {
+            ArgumentParser.Default.CreateCommandCatagory<NoOptions>();
+            Assert.IsNotNull(ArgumentParser.Default.GetCommandCatagory<NoOptions>());
+        }
+
+        [TestMethod]
+        public void ArgumentParserGetCommandCatagoryIsSameTypeAs_TOptions()
+        {
+            ArgumentParser.Default.CreateCommandCatagory<NoOptions>();
+            Assert.IsInstanceOfType(ArgumentParser.Default.GetCommandCatagory<NoOptions>(), typeof(NoOptions));
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateParameterCatagoryIsNotNull()
+        {
+            Assert.IsNotNull(ArgumentParser.Default.CreateParameterCatagory<NoOptions>());
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateParameterCatagoryIsOfTypeIParameterCatagory()
+        {
+            Assert.IsInstanceOfType(ArgumentParser.Default.CreateParameterCatagory<NoOptions>(), typeof(IParameterCatagory));
+        }
+
+        [TestMethod]
+        public void ArgumentParserCreateParameterCatagoryIsOfTypeIParameterCatagory_T_()
+        {
+            Assert.IsInstanceOfType(ArgumentParser.Default.CreateParameterCatagory<NoOptions>(), typeof(IParameterCatagory<NoOptions>));
+        }
+
+        [TestMethod]
+        public void ArgumentParserGetParameterCatagoryIsNotNull()
+        {
+            ArgumentParser.Default.CreateParameterCatagory<NoOptions>();
+            Assert.IsNotNull(ArgumentParser.Default.GetParameterCatagory<NoOptions>());
+        }
+
+        [TestMethod]
+        public void ArgumentParserGetParameterCatagoryIsSameTypeAs_TOptions()
+        {
+            ArgumentParser.Default.CreateParameterCatagory<NoOptions>();
+            Assert.IsInstanceOfType(ArgumentParser.Default.GetParameterCatagory<NoOptions>(), typeof(NoOptions));
+        }
     }
 }
