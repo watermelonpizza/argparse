@@ -43,9 +43,9 @@ namespace SimpleArgumentSample
             ArgumentParser
                 .Default
                 .CreateParameterCatagory<PositionalOptions>()
-                    .WithParameter(x => x.Source, 0)
+                    .WithParameter(x => x.Source)
                         .Name("string")
-                    .WithParameter(x => x.Destination, 1)
+                    .WithParameter(x => x.Destination)
                         .Name("dest");
             
             ArgumentParser

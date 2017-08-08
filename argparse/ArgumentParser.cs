@@ -31,9 +31,17 @@ namespace argparse
         public TOptions GetArgumentCatagory<TOptions>()
             where TOptions : class, new()
         {
-            return (TOptions)
-                (_argumentCatagories.SingleOrDefault(ac => ac is ArgumentCatagory<TOptions>) as ArgumentCatagory<TOptions>)
-                    ?.CatagoryInstance;
+            try
+            {
+                var cat = _argumentCatagories.OfType<ArgumentCatagory<TOptions>>().SingleOrDefault();
+
+                return (TOptions)cat.CatagoryInstance;
+            }
+            catch (InvalidOperationException)
+            {
+
+                throw;
+            }
         }
 
         public IParameterCatagory<TOptions> CreateParameterCatagory<TOptions>()

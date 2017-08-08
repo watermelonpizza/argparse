@@ -55,7 +55,7 @@ namespace argparse
 
         public ICommand<TOptions> Name(string name)
         {
-            CommandName = name;
+            CommandName = ArgumentHelper.FormatCommandName(name);
 
             return this;
         }

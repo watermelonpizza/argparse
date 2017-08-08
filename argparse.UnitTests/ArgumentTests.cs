@@ -11,78 +11,99 @@ namespace argparse.UnitTests
         [TestMethod]
         public void ArgumentDefaultName_PascalCase()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
-            Assert.AreEqual("pascal-case-proprty", argument.ArgumentName);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
+            Assert.AreEqual("pascal-case-property", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_LowerCase()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.lowercaseproperty);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.lowercaseproperty);
             Assert.AreEqual("lowercaseproperty", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_UpperCase()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.UPPERCASEPROPERTY);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.UPPERCASEPROPERTY);
             Assert.AreEqual("uppercaseproperty", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_CamelCase()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.camelCaseProperty);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.camelCaseProperty);
             Assert.AreEqual("camel-case-property", argument.ArgumentName);
         }
 
         [TestMethod]
-        public void ArgumentDefaultName_TLA()
+        public void ArgumentDefaultName_EndingTLA()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PropertyWithTLA);
-            Assert.AreEqual("property-with-tla", argument.ArgumentName);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PropertyWithEndingTLA);
+            Assert.AreEqual("property-with-ending-tla", argument.ArgumentName);
+        }
+
+        [TestMethod]
+        public void ArgumentDefaultName_TLAInIt()
+        {
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PropertyWithTLAInIt);
+            Assert.AreEqual("property-with-tla-in-it", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_OnlyTLA()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.TLA);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.TLA);
             Assert.AreEqual("tla", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_Underscores()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.TLA);
-            Assert.AreEqual("tla", argument.ArgumentName);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.Property_With_Underscores);
+            Assert.AreEqual("property-with-underscores", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_LowerCaseUnderscores()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.property_in_lowercase_with_underscores);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.property_in_lowercase_with_underscores);
             Assert.AreEqual("property-in-lowercase-with-underscores", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_UppercaseUnderscores()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PROPERTY_IN_UPPERCASE_WITH_UNDERSCORES);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PROPERTY_IN_UPPERCASE_WITH_UNDERSCORES);
             Assert.AreEqual("property-in-uppercase-with-underscores", argument.ArgumentName);
+        }
+
+        [TestMethod]
+        public void ArgumentDefaultName_NumberInIt()
+        {
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PropertyWithNumber1InIt);
+            Assert.AreEqual("property-with-number-1-in-it", argument.ArgumentName);
+        }
+
+        [TestMethod]
+        public void ArgumentDefaultName_EndingNumber()
+        {
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PropertyWithNumberEnding1);
+            Assert.AreEqual("property-with-number-ending-1", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentDefaultName_Number()
         {
-            IArgument argument = ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PropertyWithNumber1);
-            Assert.AreEqual("property-with-number-1", argument.ArgumentName);
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PropertyWithTLA1Number);
+            Assert.AreEqual("property-with-tla-1-number", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentNameMethodSetsName()
         {
-            IArgument<NameOptions, int> argument = 
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name("custom-name");
+            IArgument<NameOptions, int> argument =
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name("custom-name");
 
             Assert.AreEqual("custom-name", argument.ArgumentName);
         }
@@ -91,7 +112,7 @@ namespace argparse.UnitTests
         public void ArgumentNameMethodSingleCharacterShouldThrowArgumentException()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
             Assert.ThrowsException<ArgumentException>(() => argument.Name("a"));
         }
@@ -99,8 +120,8 @@ namespace argparse.UnitTests
         [TestMethod]
         public void ArgumentNameMethodUpperCaseValuesShouldThrowArgumentException()
         {
-            IArgument<NameOptions, int> argument = 
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
+            IArgument<NameOptions, int> argument =
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
             Assert.ThrowsException<ArgumentException>(() => argument.Name("UP"));
         }
@@ -109,7 +130,7 @@ namespace argparse.UnitTests
         public void ArgumentNameMethodSymbolsShouldThrowArgumentException()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
             Assert.ThrowsException<ArgumentException>(() => argument.Name("a!"));
             Assert.ThrowsException<ArgumentException>(() => argument.Name("a#"));
@@ -121,28 +142,24 @@ namespace argparse.UnitTests
         }
 
         [TestMethod]
-        public void ArgumentNameMethodOnlyNumbersShouldThrowArgumentException()
+        public void ArgumentNameMethodOnlyNumbersPasses()
         {
-            IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
-
-            Assert.ThrowsException<ArgumentException>(() => argument.Name("1234"));
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name("1234");
+            Assert.AreEqual("1234", argument.ArgumentName);
         }
 
         [TestMethod]
-        public void ArgumentNameMethodStartsWithNumberShouldThrowArgumentException()
+        public void ArgumentNameMethodStartsWithNumberPasses()
         {
-            IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
-
-            Assert.ThrowsException<ArgumentException>(() => argument.Name("1abc"));
+            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name("1abc");
+            Assert.AreEqual("1abc", argument.ArgumentName);
         }
 
         [TestMethod]
         public void ArgumentNameMethodStartsWithHyphenShouldThrowArgumentException()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
             Assert.ThrowsException<ArgumentException>(() => argument.Name("-abc"));
         }
@@ -151,7 +168,7 @@ namespace argparse.UnitTests
         public void ArgumentNameMethodSpaceShouldThrowArgumentException()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
             Assert.ThrowsException<ArgumentException>(() => argument.Name("aaa bbb"));
         }
@@ -160,7 +177,7 @@ namespace argparse.UnitTests
         public void ArgumentFlagMethodSetsFlag()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('a');
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('a');
 
             Assert.AreEqual('a', argument.ArgumentFlag);
         }
@@ -169,7 +186,7 @@ namespace argparse.UnitTests
         public void ArgumentFlagCanSupportUpperCase()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('A');
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('A');
 
             Assert.AreEqual('A', argument.ArgumentFlag);
         }
@@ -178,7 +195,7 @@ namespace argparse.UnitTests
         public void ArgumentFlagCanSupportNumbers()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('1');
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('1');
 
             Assert.AreEqual('1', argument.ArgumentFlag);
         }
@@ -187,7 +204,7 @@ namespace argparse.UnitTests
         public void ArgumentFlagSymbolShouldThrowArgumentException()
         {
             IArgument<NameOptions, int> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
             Assert.ThrowsException<ArgumentException>(() => argument.Flag('!'));
             Assert.ThrowsException<ArgumentException>(() => argument.Flag('~'));
@@ -202,7 +219,7 @@ namespace argparse.UnitTests
         public void ArgumentRequiredMethodsSetsArgumentToRequired()
         {
             IArgument<BasicOptions, bool> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean).Required();
+                new ArgumentParser().CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean).Required();
 
             Assert.IsTrue(argument.IsRequired);
         }
@@ -211,7 +228,7 @@ namespace argparse.UnitTests
         public void ArgumentWithArgumentReturnsANewArgument()
         {
             IArgument<BasicOptions, bool> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
+                new ArgumentParser().CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
 
             Assert.AreNotSame(argument, argument.WithArgument(x => x.Byte));
         }
@@ -220,7 +237,7 @@ namespace argparse.UnitTests
         public void ArgumentGetCatagoryReturnsCatagory()
         {
             IArgument<BasicOptions, bool> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
+                new ArgumentParser().CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
 
             Assert.IsInstanceOfType(argument.GetArgumentCatagory<BasicOptions>(), typeof(BasicOptions));
         }
@@ -229,7 +246,7 @@ namespace argparse.UnitTests
         public void ArgumentGetCatagoryIsNotNull()
         {
             IArgument<BasicOptions, bool> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
+                new ArgumentParser().CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
 
             Assert.IsNotNull(argument.GetArgumentCatagory<BasicOptions>());
         }
@@ -238,7 +255,7 @@ namespace argparse.UnitTests
         public void ArgumentBasicArgumentTypeIsNotMultiple()
         {
             IArgument<BasicOptions, bool> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
+                new ArgumentParser().CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean);
 
             Assert.IsFalse(argument.IsMultiple);
         }
@@ -247,7 +264,7 @@ namespace argparse.UnitTests
         public void ArgumentEnumerableArgumentTypeIsMultiple()
         {
             IArgument<MultiOptions, IEnumerable<bool>> argument =
-                ArgumentParser.Default.CreateArgumentCatagory<MultiOptions>().WithArgument(x => x.Boolean);
+                new ArgumentParser().CreateArgumentCatagory<MultiOptions>().WithArgument(x => x.Boolean);
 
             Assert.IsTrue(argument.IsMultiple);
         }
@@ -256,33 +273,33 @@ namespace argparse.UnitTests
         public void ArgumentEnumerableTypesNotSupportedExceptIEnumerable()
         {
             Assert.ThrowsException<ArgumentException>(() =>
-                ArgumentParser.Default.CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.ICollection));
+                new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.ICollection));
             Assert.ThrowsException<ArgumentException>(() =>
-                ArgumentParser.Default.CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IReadOnlyCollection));
+                new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IReadOnlyCollection));
             Assert.ThrowsException<ArgumentException>(() =>
-                ArgumentParser.Default.CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IDictionary));
+                new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IDictionary));
             Assert.ThrowsException<ArgumentException>(() =>
-                ArgumentParser.Default.CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.Dictionary));
+                new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.Dictionary));
             Assert.ThrowsException<ArgumentException>(() =>
-                ArgumentParser.Default.CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IList));
+                new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IList));
             Assert.ThrowsException<ArgumentException>(() =>
-                ArgumentParser.Default.CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.List));
+                new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.List));
         }
 
         [TestMethod]
         public void ArgumentPropertyWithGetAndSetAccessorsPasses()
         {
-            ArgumentParser.Default.CreateArgumentCatagory<PropertyTypes>().WithArgument(x => x.GetAndSet);
+            new ArgumentParser().CreateArgumentCatagory<PropertyTypes>().WithArgument(x => x.GetAndSet);
         }
 
         [TestMethod]
         public void ArgumentWithoutGetOrSetShouldThrowArgumentException()
         {
             Assert.ThrowsException<ArgumentException>(() =>
-                ArgumentParser.Default.CreateArgumentCatagory<PropertyTypes>().WithArgument(x => x.GetOnly));
+                new ArgumentParser().CreateArgumentCatagory<PropertyTypes>().WithArgument(x => x.GetOnly));
             // Build time error. Cannot test anyway
             //Assert.ThrowsException<ArgumentException>(() =>
-            //    ArgumentParser.Default.CreateArgumentCatagory<PropertyTypes>().WithArgument(x => x.SetOnly));
+            //    parser.CreateArgumentCatagory<PropertyTypes>().WithArgument(x => x.SetOnly));
         }
     }
 }

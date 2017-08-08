@@ -84,9 +84,9 @@ namespace argparse
             _currentCatagory = currentCatagory;
             Property = property;
 
-            Name(property.Name);
+            ArgumentName = ArgumentHelper.DefaultArgumentToString(property.Name);
 
-            if (typeof(TArgument) is IEnumerable)
+            if (typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeof(TArgument).GetTypeInfo()))
             {
                 ArgumentType = typeof(TArgument).GenericTypeArguments[0];
                 IsMultiple = true;
@@ -211,14 +211,14 @@ namespace argparse
 
         public IArgument<TOptions, TArgument> Name(string name)
         {
-            if (!string.IsNullOrEmpty(name) || !Regex.IsMatch(name, ArgumentHelper.NameMatchPattern))
+            if (string.IsNullOrEmpty(name) || !Regex.IsMatch(name, ArgumentHelper.NameMatchPattern))
             {
                 throw new ArgumentException(
                     $"{nameof(name)} must only be compromised of letters, numbers or hyphens, must be at least two characters and must start with a letter. Match pattern: { ArgumentHelper.NameMatchPattern }",
                     nameof(name));
             }
 
-            ArgumentName = name; // TODO: Parse name
+            ArgumentName = name;
 
             return this;
         }

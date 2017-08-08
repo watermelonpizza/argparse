@@ -23,7 +23,9 @@ namespace argparse.UnitTests
 
     public class optionsInCamelCase { }
 
-    public class OptionsWithTLA { }
+    public class OptionsWithEndingTLA { }
+
+    public class OptionsWithTLAInIt { }
 
     public class TLA { }
 
@@ -33,18 +35,28 @@ namespace argparse.UnitTests
 
     public class OPTIONS_IN_UPPERCASE_WITH_UNDERSCORES { }
 
+    public class OptionsWithNumber1InIt { }
+
+    public class OptionsWithNumberEnding1 { }
+
+    public class OptionsWithTLA1Number { }
+
     public class NameOptions
     {
         public int lowercaseproperty { get; set; }
         public int UPPERCASEPROPERTY { get; set; }
         public int PascalCaseProperty { get; set; }
         public int camelCaseProperty { get; set; }
-        public int PropertyWithTLA { get; set; }
+        public int PropertyWithEndingTLA { get; set; }
+        public int PropertyWithTLAInIt { get; set; }
         public int TLA { get; set; }
         public int Property_With_Underscores { get; set; }
         public int property_in_lowercase_with_underscores { get; set; }
         public int PROPERTY_IN_UPPERCASE_WITH_UNDERSCORES { get; set; }
-        public int PropertyWithNumber1 { get; set; }
+        public int PropertyWithNumber1InIt { get; set; }
+        public int PropertyWithNumberEnding1 { get; set; }
+        public int PropertyWithTLA1Number { get; set; }
+
     }
 #pragma warning restore IDE1006 // Naming Styles
 

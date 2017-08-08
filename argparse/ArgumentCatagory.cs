@@ -23,7 +23,7 @@ namespace argparse
         public ArgumentCatagory(ICreateArgumentCatagory catagoryCreator, string name)
         {
             _catagoryCreator = catagoryCreator;
-            CatagoryName = name;
+            CatagoryName = ArgumentHelper.FormatModuleName(name);
         }
 
         public IArgumentCatagory<TOptions> Name(string name)
@@ -38,7 +38,9 @@ namespace argparse
             PropertyInfo property = (argument.Body as MemberExpression).Member as PropertyInfo;
 
             if (_arguments.Any(a => a.Property == property))
-                throw new ArgumentException($"Property '{property.Name}' has already been added to this catagory '{typeof(TOptions).Name}' and cannot be set twice.");
+            {
+                throw new ArgumentException($"Property '{property.Name}' has already been added to the catagory '{typeof(TOptions).Name}' and cannot be set twice.");
+            }
 
             var arg = new Argument<TOptions, TArgument>(_catagoryCreator, this, property);
             _arguments.Add(arg);

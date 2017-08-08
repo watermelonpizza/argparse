@@ -21,7 +21,7 @@ namespace argparse
         public CommandCatagory(ICreateCommandCatagory catagoryCreator, string name)
         {
             _catagoryCreator = catagoryCreator;
-            CatagoryName = name;
+            CatagoryName = ArgumentHelper.FormatModuleName(name);
         }
 
         public ICommandCatagory<TOptions> Name(string name)

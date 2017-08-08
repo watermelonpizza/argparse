@@ -7,6 +7,6 @@ namespace argparse
 {
     public interface IWithParameter<TArgumentOptions>
     {
-        IParameter<TArgumentOptions, TArgument> WithParameter<TArgument>(Expression<Func<TArgumentOptions, TArgument>> argument, uint position);
+        IParameter<TArgumentOptions, TArgument> WithParameter<TArgument>(Expression<Func<TArgumentOptions, TArgument>> argument);
     }
 }

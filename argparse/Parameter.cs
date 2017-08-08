@@ -42,7 +42,7 @@ namespace argparse
 
             Name(property.Name);
 
-            if (typeof(TArgument) is IEnumerable)
+            if (typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeof(TArgument).GetTypeInfo()))
             {
                 ParameterType = typeof(TArgument).GenericTypeArguments[0];
                 IsMultiple = true;
@@ -63,7 +63,7 @@ namespace argparse
             {
                 try
                 {
-            ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+                    ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
 
                     // If the property is enumerable and it's not null cast to a list, add the new value and set it back
                     if (Property.GetValue(instance.CatagoryInstance) is IEnumerable<TArgument> propValue)
@@ -133,9 +133,9 @@ namespace argparse
             return this;
         }
 
-        public IParameter<TArgumentOptions, TArgument1> WithParameter<TArgument1>(Expression<Func<TArgumentOptions, TArgument1>> argument, uint position)
+        public IParameter<TArgumentOptions, TArgument1> WithParameter<TArgument1>(Expression<Func<TArgumentOptions, TArgument1>> argument)
         {
-            return _currentCatagory.WithParameter(argument, position);
+            return _currentCatagory.WithParameter(argument);
         }
 
         public IParameterCatagory<TOptions> CreateParameterCatagory<TOptions>()
