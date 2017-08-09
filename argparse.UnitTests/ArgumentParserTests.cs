@@ -6,7 +6,7 @@ using Xunit;
 
 namespace argparse.UnitTests
 {
-        public class ArgumentParserTests
+    public class ArgumentParserTests
     {
         [Fact]
         public void ArgumentParserStaticDefaultInstanceIsInstantiated()
@@ -204,13 +204,13 @@ namespace argparse.UnitTests
         [Fact]
         public void ArgumentParserCreateArgumentCatagoryIsOfTypeIArgumentCatagory()
         {
-            Assert.IsType<IArgumentCatagory>(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
+            Assert.IsAssignableFrom<IArgumentCatagory>(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
         }
 
         [Fact]
         public void ArgumentParserCreateArgumentCatagoryIsOfTypeIArgumentCatagory_T_()
         {
-            Assert.IsType< IArgumentCatagory<NoOptions>>(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
+            Assert.IsAssignableFrom<IArgumentCatagory<NoOptions>>(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
         }
 
         [Fact]
@@ -238,13 +238,13 @@ namespace argparse.UnitTests
         [Fact]
         public void ArgumentParserCreateCommandCatagoryIsOfTypeICommandCatagory()
         {
-            Assert.IsType<ICommandCatagory>(new ArgumentParser().CreateCommandCatagory<NoOptions>());
+            Assert.IsAssignableFrom<ICommandCatagory>(new ArgumentParser().CreateCommandCatagory<NoOptions>());
         }
 
         [Fact]
         public void ArgumentParserCreateCommandCatagoryIsOfTypeICommandCatagory_T_()
         {
-            Assert.IsType<ICommandCatagory<NoOptions>>(new ArgumentParser().CreateCommandCatagory<NoOptions>());
+            Assert.IsAssignableFrom<ICommandCatagory<NoOptions>>(new ArgumentParser().CreateCommandCatagory<NoOptions>());
         }
 
         [Fact]
@@ -272,13 +272,13 @@ namespace argparse.UnitTests
         [Fact]
         public void ArgumentParserCreateParameterCatagoryIsOfTypeIParameterCatagory()
         {
-            Assert.IsType<IParameterCatagory>(new ArgumentParser().CreateParameterCatagory<NoOptions>());
+            Assert.IsAssignableFrom<IParameterCatagory>(new ArgumentParser().CreateParameterCatagory<NoOptions>());
         }
 
         [Fact]
         public void ArgumentParserCreateParameterCatagoryIsOfTypeIParameterCatagory_T_()
         {
-            Assert.IsType<IParameterCatagory<NoOptions>>(new ArgumentParser().CreateParameterCatagory<NoOptions>());
+            Assert.IsAssignableFrom<IParameterCatagory<NoOptions>>(new ArgumentParser().CreateParameterCatagory<NoOptions>());
         }
 
         [Fact]

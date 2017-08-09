@@ -5,7 +5,7 @@ using Xunit;
 
 namespace argparse.UnitTests
 {
-        public class ArgumentTests
+    public class ArgumentTests
     {
         [Fact]
         public void ArgumentDefaultName_PascalCase()

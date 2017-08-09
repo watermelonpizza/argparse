@@ -86,7 +86,7 @@ namespace argparse
 
             ArgumentName = ArgumentHelper.DefaultArgumentToString(property.Name);
 
-            if (typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeof(TArgument).GetTypeInfo()))
+            if (typeof(TArgument) != typeof(string) && typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeof(TArgument).GetTypeInfo()))
             {
                 ArgumentType = typeof(TArgument).GenericTypeArguments[0];
                 IsMultiple = true;

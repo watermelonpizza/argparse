@@ -42,7 +42,7 @@ namespace argparse
 
             Name(property.Name);
 
-            if (typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeof(TArgument).GetTypeInfo()))
+            if (typeof(TArgument) != typeof(string) && typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeof(TArgument).GetTypeInfo()))
             {
                 ParameterType = typeof(TArgument).GenericTypeArguments[0];
                 IsMultiple = true;

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace argparse.UnitTests
 {
-        public class CommandCatagoryTests
+    public class CommandCatagoryTests
     {
         [Fact]
         public void CommandCatagoryDefaultName_PascalCase()
@@ -116,7 +116,7 @@ namespace argparse.UnitTests
         {
             ICommandCatagory<Commands> catagory = new ArgumentParser().CreateCommandCatagory<Commands>();
 
-            Assert.IsType<ICommand>(catagory.WithCommand(x => x.FlagCommand));
+            Assert.IsAssignableFrom<ICommand>(catagory.WithCommand(x => x.FlagCommand));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace argparse.UnitTests
         {
             ICommandCatagory<Commands> catagory = new ArgumentParser().CreateCommandCatagory<Commands>();
 
-            Assert.IsType<ICommand<Commands>>(catagory.WithCommand(x => x.FlagCommand));
+            Assert.IsAssignableFrom<ICommand<Commands>>(catagory.WithCommand(x => x.FlagCommand));
         }
     }
 }

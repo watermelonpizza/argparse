@@ -5,7 +5,7 @@ using Xunit;
 
 namespace argparse.UnitTests
 {
-        public class ArgumentCatagoryTests
+    public class ArgumentCatagoryTests
     {
         [Fact]
         public void ArgumentCatagoryDefaultName_PascalCase()
@@ -116,7 +116,7 @@ namespace argparse.UnitTests
         {
             IArgumentCatagory<BasicOptions> catagory = new ArgumentParser().CreateArgumentCatagory<BasicOptions>();
 
-            Assert.IsType<IArgument>(catagory.WithArgument(x => x.Boolean));
+            Assert.IsAssignableFrom<IArgument>(catagory.WithArgument(x => x.Boolean));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace argparse.UnitTests
         {
             IArgumentCatagory<BasicOptions> catagory = new ArgumentParser().CreateArgumentCatagory<BasicOptions>();
 
-            Assert.IsType<IArgument<BasicOptions, bool>>(catagory.WithArgument(x => x.Boolean));
+            Assert.IsAssignableFrom<IArgument<BasicOptions, bool>>(catagory.WithArgument(x => x.Boolean));
         }
 
         [Fact]

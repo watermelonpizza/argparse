@@ -275,10 +275,10 @@ namespace argparse
 
         private (bool success, bool nextArgumentUsed) FindNameAndSetProperty((string prefix, string argument) arg, string nextArg, bool nextArgIsArgument)
         {
-            IArgument argument =
-                 _argumentCatagories
-                     .SelectMany(ac => ac.Arguments)
-                     .SingleOrDefault(a => a.ArgumentName.StartsWith(arg.argument));
+            IArgument argument = 
+                _argumentCatagories
+                    .SelectMany(ac => ac.Arguments)
+                    .SingleOrDefault(a => a.ArgumentName.StartsWith(arg.argument));
 
             if (argument != null)
             {

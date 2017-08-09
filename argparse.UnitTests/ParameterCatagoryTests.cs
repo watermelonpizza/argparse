@@ -116,7 +116,7 @@ namespace argparse.UnitTests
         {
             IParameterCatagory<BasicOptions> catagory = new ArgumentParser().CreateParameterCatagory<BasicOptions>();
 
-            Assert.IsType<IParameter>(catagory.WithParameter(x => x.Boolean));
+            Assert.IsAssignableFrom<IParameter>(catagory.WithParameter(x => x.Boolean));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace argparse.UnitTests
         {
             IParameterCatagory<BasicOptions> catagory = new ArgumentParser().CreateParameterCatagory<BasicOptions>();
 
-            Assert.IsType<IParameter<BasicOptions, bool>>(catagory.WithParameter(x => x.Boolean));
+            Assert.IsAssignableFrom<IParameter<BasicOptions, bool>>(catagory.WithParameter(x => x.Boolean));
         }
 
         [Fact]
