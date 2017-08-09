@@ -2,7 +2,7 @@
   "profiles": {
     "SimpleArgumentSample": {
       "commandName": "Project",
-      "commandLineArgs": "-fhRsDflags     -h --help /h /help -l \"c://app\" --log \"c:\\app\" --log=\"c:/app\" --log=c:/app/log.txt /l:\"c:\\app\" /log \"c:/app\" /log=\"c:/app\""
+      "commandLineArgs": "-fhRsDflags -log=\"c:\\my spaced folder\\my_file name.txt\"    -h --help /h /help -l \"c://app\" --log \"c:\\app\" --log=\"c:/app\" --log=c:/app/log.txt /l:\"c:\\app\" /log \"c:/app\" /log=\"c:/app\""
     }
   }
 }

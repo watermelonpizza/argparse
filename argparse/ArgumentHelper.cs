@@ -69,7 +69,7 @@ namespace argparse
         {
             if (arg.StartsWith(WindowsArgumentPrefix))
             {
-                return (WindowsArgumentPrefix, arg.Substring(WindowsArgumentPrefix.Length));
+                return (WindowsArgumentPrefix, arg.Substring(WindowsArgumentPrefix.Length).ToLowerInvariant());
             }
             else if (arg == NamePrefix)
             {
@@ -77,11 +77,11 @@ namespace argparse
             }
             else if (arg.StartsWith(NamePrefix))
             {
-                return (NamePrefix, arg.Substring(NamePrefix.Length));
+                return (NamePrefix, arg.Substring(NamePrefix.Length).ToLowerInvariant());
             }
             else if (arg.StartsWith(FlagPrefix))
             {
-                return (FlagPrefix, arg.Substring(FlagPrefix.Length));
+                return (FlagPrefix, arg.Substring(FlagPrefix.Length).ToLowerInvariant());
             }
 
             return (null, arg);

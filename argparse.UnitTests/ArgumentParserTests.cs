@@ -1,301 +1,300 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xunit;
 
 namespace argparse.UnitTests
 {
-    [TestClass]
-    public class ArgumentParserTests
+        public class ArgumentParserTests
     {
-        [TestMethod]
+        [Fact]
         public void ArgumentParserStaticDefaultInstanceIsInstantiated()
         {
-            Assert.IsNotNull(ArgumentParser.Default);
-            Assert.IsInstanceOfType(ArgumentParser.Default, typeof(ArgumentParser));
+            Assert.NotNull(ArgumentParser.Default);
+            Assert.IsType<ArgumentParser>(ArgumentParser.Default);
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_bool()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(bool)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(bool)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_byte()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(byte)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(byte)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_sbyte()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(sbyte)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(sbyte)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_short()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(short)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(short)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_int()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(int)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(int)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_uint()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(uint)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(uint)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_long()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(long)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(long)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_ulong()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(ulong)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(ulong)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_float()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(float)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(float)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_double()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(double)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(double)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_decimal()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(decimal)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(decimal)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_char()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(char)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(char)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_string()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(string)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(string)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_DateTime()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(DateTime)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(DateTime)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_Enum()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(Enum)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(Enum)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_bool()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<bool>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<bool>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_byte()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<byte>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<byte>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_sbyte()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<sbyte>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<sbyte>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_short()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<short>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<short>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_int()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<int>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<int>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_uint()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<uint>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<uint>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_long()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<long>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<long>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_ulong()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<ulong>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<ulong>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_float()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<float>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<float>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_double()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<double>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<double>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_decimal()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<decimal>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<decimal>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_char()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<char>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<char>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_string()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<string>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<string>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_DateTime()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<DateTime>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<DateTime>)));
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_Enum()
         {
-            Assert.IsTrue(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<Enum>)));
+            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<Enum>)));
         }
 
-        [TestMethod]
-        public void ArgumentParserArgumentCreateCatagoryIsNotNull()
+        [Fact]
+        public void ArgumentParserArgumentCreateCatagoryNotNull()
         {
-            Assert.IsNotNull(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
+            Assert.NotNull(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserCreateArgumentCatagoryIsOfTypeIArgumentCatagory()
         {
-            Assert.IsInstanceOfType(new ArgumentParser().CreateArgumentCatagory<NoOptions>(), typeof(IArgumentCatagory));
+            Assert.IsType<IArgumentCatagory>(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserCreateArgumentCatagoryIsOfTypeIArgumentCatagory_T_()
         {
-            Assert.IsInstanceOfType(new ArgumentParser().CreateArgumentCatagory<NoOptions>(), typeof(IArgumentCatagory<NoOptions>));
+            Assert.IsType< IArgumentCatagory<NoOptions>>(new ArgumentParser().CreateArgumentCatagory<NoOptions>());
         }
 
-        [TestMethod]
-        public void ArgumentParserGetArgumentCatagoryIsNotNull()
+        [Fact]
+        public void ArgumentParserGetArgumentCatagoryNotNull()
         {
             ArgumentParser parser = new ArgumentParser();
             parser.CreateArgumentCatagory<NoOptions>();
-            Assert.IsNotNull(parser.GetArgumentCatagory<NoOptions>());
+            Assert.NotNull(parser.GetArgumentCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserGetArgumentCatagoryIsSameTypeAs_TOptions()
         {
             ArgumentParser parser = new ArgumentParser();
             parser.CreateArgumentCatagory<NoOptions>();
-            Assert.IsInstanceOfType(parser.GetArgumentCatagory<NoOptions>(), typeof(NoOptions));
+            Assert.IsType<NoOptions>(parser.GetArgumentCatagory<NoOptions>());
         }
 
-        [TestMethod]
-        public void ArgumentParserCreateCommandCatagoryIsNotNull()
+        [Fact]
+        public void ArgumentParserCreateCommandCatagoryNotNull()
         {
-            Assert.IsNotNull(new ArgumentParser().CreateCommandCatagory<NoOptions>());
+            Assert.NotNull(new ArgumentParser().CreateCommandCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserCreateCommandCatagoryIsOfTypeICommandCatagory()
         {
-            Assert.IsInstanceOfType(new ArgumentParser().CreateCommandCatagory<NoOptions>(), typeof(ICommandCatagory));
+            Assert.IsType<ICommandCatagory>(new ArgumentParser().CreateCommandCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserCreateCommandCatagoryIsOfTypeICommandCatagory_T_()
         {
-            Assert.IsInstanceOfType(new ArgumentParser().CreateCommandCatagory<NoOptions>(), typeof(ICommandCatagory<NoOptions>));
+            Assert.IsType<ICommandCatagory<NoOptions>>(new ArgumentParser().CreateCommandCatagory<NoOptions>());
         }
 
-        [TestMethod]
-        public void ArgumentParserGetCommandCatagoryIsNotNull()
+        [Fact]
+        public void ArgumentParserGetCommandCatagoryNotNull()
         {
             ArgumentParser parser = new ArgumentParser();
             parser.CreateCommandCatagory<NoOptions>();
-            Assert.IsNotNull(parser.GetCommandCatagory<NoOptions>());
+            Assert.NotNull(parser.GetCommandCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserGetCommandCatagoryIsSameTypeAs_TOptions()
         {
             ArgumentParser parser = new ArgumentParser();
             parser.CreateCommandCatagory<NoOptions>();
-            Assert.IsInstanceOfType(parser.GetCommandCatagory<NoOptions>(), typeof(NoOptions));
+            Assert.IsType<NoOptions>(parser.GetCommandCatagory<NoOptions>());
         }
 
-        [TestMethod]
-        public void ArgumentParserCreateParameterCatagoryIsNotNull()
+        [Fact]
+        public void ArgumentParserCreateParameterCatagoryNotNull()
         {
-            Assert.IsNotNull(new ArgumentParser().CreateParameterCatagory<NoOptions>());
+            Assert.NotNull(new ArgumentParser().CreateParameterCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserCreateParameterCatagoryIsOfTypeIParameterCatagory()
         {
-            Assert.IsInstanceOfType(new ArgumentParser().CreateParameterCatagory<NoOptions>(), typeof(IParameterCatagory));
+            Assert.IsType<IParameterCatagory>(new ArgumentParser().CreateParameterCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserCreateParameterCatagoryIsOfTypeIParameterCatagory_T_()
         {
-            Assert.IsInstanceOfType(new ArgumentParser().CreateParameterCatagory<NoOptions>(), typeof(IParameterCatagory<NoOptions>));
+            Assert.IsType<IParameterCatagory<NoOptions>>(new ArgumentParser().CreateParameterCatagory<NoOptions>());
         }
 
-        [TestMethod]
-        public void ArgumentParserGetParameterCatagoryIsNotNull()
+        [Fact]
+        public void ArgumentParserGetParameterCatagoryNotNull()
         {
             ArgumentParser parser = new ArgumentParser();
             parser.CreateParameterCatagory<NoOptions>();
-            Assert.IsNotNull(parser.GetParameterCatagory<NoOptions>());
+            Assert.NotNull(parser.GetParameterCatagory<NoOptions>());
         }
 
-        [TestMethod]
+        [Fact]
         public void ArgumentParserGetParameterCatagoryIsSameTypeAs_TOptions()
         {
             ArgumentParser parser = new ArgumentParser();
             parser.CreateParameterCatagory<NoOptions>();
-            Assert.IsInstanceOfType(parser.GetParameterCatagory<NoOptions>(), typeof(NoOptions));
+            Assert.IsType<NoOptions>(parser.GetParameterCatagory<NoOptions>());
         }
     }
 }

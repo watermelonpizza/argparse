@@ -1,139 +1,138 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Xunit;
 
 namespace argparse.UnitTests
 {
-    [TestClass]
     public class ParameterCatagoryTests
     {
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_PascalCase()
         {
-            Assert.AreEqual("Options In Pascal Case", new ArgumentParser().CreateParameterCatagory<OptionsInPascalCase>().CatagoryName);
+            Assert.Equal("Options In Pascal Case", new ArgumentParser().CreateParameterCatagory<OptionsInPascalCase>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_LowerCase()
         {
-            Assert.AreEqual("optionsinlowercase", new ArgumentParser().CreateParameterCatagory<optionsinlowercase>().CatagoryName);
+            Assert.Equal("optionsinlowercase", new ArgumentParser().CreateParameterCatagory<optionsinlowercase>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_UpperCase()
         {
-            Assert.AreEqual("OPTIONSINUPPERCASE", new ArgumentParser().CreateParameterCatagory<OPTIONSINUPPERCASE>().CatagoryName);
+            Assert.Equal("OPTIONSINUPPERCASE", new ArgumentParser().CreateParameterCatagory<OPTIONSINUPPERCASE>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_CamelCase()
         {
-            Assert.AreEqual("options In Camel Case", new ArgumentParser().CreateParameterCatagory<optionsInCamelCase>().CatagoryName);
+            Assert.Equal("options In Camel Case", new ArgumentParser().CreateParameterCatagory<optionsInCamelCase>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_EndingTLA()
         {
-            Assert.AreEqual("Options With Ending TLA", new ArgumentParser().CreateParameterCatagory<OptionsWithEndingTLA>().CatagoryName);
+            Assert.Equal("Options With Ending TLA", new ArgumentParser().CreateParameterCatagory<OptionsWithEndingTLA>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_TLA()
         {
-            Assert.AreEqual("Options With TLA In It", new ArgumentParser().CreateParameterCatagory<OptionsWithTLAInIt>().CatagoryName);
+            Assert.Equal("Options With TLA In It", new ArgumentParser().CreateParameterCatagory<OptionsWithTLAInIt>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_OnlyTLA()
         {
-            Assert.AreEqual("TLA", new ArgumentParser().CreateParameterCatagory<TLA>().CatagoryName);
+            Assert.Equal("TLA", new ArgumentParser().CreateParameterCatagory<TLA>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_Underscores()
         {
-            Assert.AreEqual("Options With Underscores", new ArgumentParser().CreateParameterCatagory<Options_With_Underscores>().CatagoryName);
+            Assert.Equal("Options With Underscores", new ArgumentParser().CreateParameterCatagory<Options_With_Underscores>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_LowerCaseUnderscores()
         {
-            Assert.AreEqual("options in lowercase with underscores", new ArgumentParser().CreateParameterCatagory<options_in_lowercase_with_underscores>().CatagoryName);
+            Assert.Equal("options in lowercase with underscores", new ArgumentParser().CreateParameterCatagory<options_in_lowercase_with_underscores>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_UpperCaseWithUnderscores()
         {
-            Assert.AreEqual("OPTIONS IN UPPERCASE WITH UNDERSCORES", new ArgumentParser().CreateParameterCatagory<OPTIONS_IN_UPPERCASE_WITH_UNDERSCORES>().CatagoryName);
+            Assert.Equal("OPTIONS IN UPPERCASE WITH UNDERSCORES", new ArgumentParser().CreateParameterCatagory<OPTIONS_IN_UPPERCASE_WITH_UNDERSCORES>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_NumberInIt()
         {
-            Assert.AreEqual("Options With Number 1 In It", new ArgumentParser().CreateParameterCatagory<OptionsWithNumber1InIt>().CatagoryName);
+            Assert.Equal("Options With Number 1 In It", new ArgumentParser().CreateParameterCatagory<OptionsWithNumber1InIt>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_NumberEnding()
         {
-            Assert.AreEqual("Options With Number Ending 1", new ArgumentParser().CreateParameterCatagory<OptionsWithNumberEnding1>().CatagoryName);
+            Assert.Equal("Options With Number Ending 1", new ArgumentParser().CreateParameterCatagory<OptionsWithNumberEnding1>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryDefaultName_TLAAndNumber()
         {
-            Assert.AreEqual("Options With TLA 1 Number", new ArgumentParser().CreateParameterCatagory<OptionsWithTLA1Number>().CatagoryName);
+            Assert.Equal("Options With TLA 1 Number", new ArgumentParser().CreateParameterCatagory<OptionsWithTLA1Number>().CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryNameMethodSetsName()
         {
             IParameterCatagory<NoOptions> cat = new ArgumentParser().CreateParameterCatagory<NoOptions>();
             cat.Name("CustomName");
 
-            Assert.AreEqual("CustomName", cat.CatagoryName);
+            Assert.Equal("CustomName", cat.CatagoryName);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryNameMethodSetsAnything()
         {
-            Assert.AreEqual("CustomName", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("CustomName").CatagoryName);
-            Assert.AreEqual("MY fun N!!", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("MY fun N!!").CatagoryName);
-            Assert.AreEqual("12345!@#$%^&*()_+", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("12345!@#$%^&*()_+").CatagoryName);
-            Assert.AreEqual("🍉 watermelon options", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("🍉 watermelon options").CatagoryName);
+            Assert.Equal("CustomName", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("CustomName").CatagoryName);
+            Assert.Equal("MY fun N!!", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("MY fun N!!").CatagoryName);
+            Assert.Equal("12345!@#$%^&*()_+", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("12345!@#$%^&*()_+").CatagoryName);
+            Assert.Equal("🍉 watermelon options", new ArgumentParser().CreateParameterCatagory<NoOptions>().Name("🍉 watermelon options").CatagoryName);
         }
 
-        [TestMethod]
-        public void ParameterCatagoryWithCatagoryIsNotNull()
+        [Fact]
+        public void ParameterCatagoryWithCatagoryNotNull()
         {
             IParameterCatagory<BasicOptions> catagory = new ArgumentParser().CreateParameterCatagory<BasicOptions>();
 
-            Assert.IsNotNull(catagory.WithParameter(x => x.Boolean));
+            Assert.NotNull(catagory.WithParameter(x => x.Boolean));
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryWithCatagoryIsTypeIPatameter()
         {
             IParameterCatagory<BasicOptions> catagory = new ArgumentParser().CreateParameterCatagory<BasicOptions>();
 
-            Assert.IsInstanceOfType(catagory.WithParameter(x => x.Boolean), typeof(IParameter));
+            Assert.IsType<IParameter>(catagory.WithParameter(x => x.Boolean));
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryWithCatagoryIsTypeIParameter_T_()
         {
             IParameterCatagory<BasicOptions> catagory = new ArgumentParser().CreateParameterCatagory<BasicOptions>();
 
-            Assert.IsInstanceOfType(catagory.WithParameter(x => x.Boolean), typeof(IParameter<BasicOptions, bool>));
+            Assert.IsType<IParameter<BasicOptions, bool>>(catagory.WithParameter(x => x.Boolean));
         }
 
-        [TestMethod]
+        [Fact]
         public void ParameterCatagoryWithCatagoryOnSamePropertyThrowArgumentException()
         {
             IParameterCatagory<BasicOptions> catagory = new ArgumentParser().CreateParameterCatagory<BasicOptions>();
 
-            Assert.ThrowsException<ArgumentException>(() => catagory.WithParameter(x => x.Boolean).WithParameter(x => x.Boolean));
+            Assert.Throws<ArgumentException>(() => catagory.WithParameter(x => x.Boolean).WithParameter(x => x.Boolean));
         }
     }
 }

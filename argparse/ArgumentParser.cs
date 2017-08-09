@@ -87,7 +87,8 @@ namespace argparse
 
         public void Parse(params string[] args)
         {
-            args = ArgumentHelper.StripApplication(args);
+            // Handled in dotnet
+            //args = ArgumentHelper.StripApplication(args);
 
             // Keep a record of the parameters found so far 
             // so we can add them to the correct parameter position
