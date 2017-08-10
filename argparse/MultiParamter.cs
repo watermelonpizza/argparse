@@ -8,7 +8,7 @@ using System.Text;
 
 namespace argparse
 {
-    internal class Parameter<TArgumentOptions, TArgument> : IParameter<TArgumentOptions, TArgument>, IProperty
+    internal class MultiParamter<TArgumentOptions, TArgument> : IParameter<TArgumentOptions, TArgument>, IMultiProperty
     {
         private IParameterCatagory<TArgumentOptions> _currentCatagory;
         private ICreateParameterCatagory _catagoryCreator;
@@ -27,7 +27,7 @@ namespace argparse
 
         public PropertyInfo Property { get; }
 
-        public Parameter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property, uint position)
+        public MultiParamter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property, uint position)
         {
             if (!ArgumentParser.SupportedTypes.Contains(typeof(TArgument)))
             {
@@ -41,10 +41,54 @@ namespace argparse
             Property = property;
 
             Name(property.Name);
-
+            
             ParameterType = typeof(TArgument);
+            IsMultiple = true;
 
             Position = position;
+        }
+
+        public void AddValue(object obj)
+        {
+            if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
+
+            if (IsMultiple)
+            {
+                try
+                {
+                    ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+
+                    // If the property is enumerable and it's not null cast to a list, add the new value and set it back
+                    if (Property.GetValue(instance.CatagoryInstance) is IEnumerable<TArgument> propValue)
+                    {
+                        if (propValue != null)
+                        {
+                            IList<TArgument> propListValue = propValue.ToList();
+                            propListValue.Add((TArgument)obj);
+                            Property.SetValue(instance.CatagoryInstance, propListValue);
+                        }
+                        // Otherwise create a new list and set the property
+                        else
+                        {
+                            Property.SetValue(
+                                instance.CatagoryInstance,
+                                new List<TArgument>
+                                {
+                                     (TArgument)obj
+                                });
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            else
+            {
+                // TODO: Throw exception why cannot add to non multiple
+            }
         }
 
         public void SetValue(object obj)

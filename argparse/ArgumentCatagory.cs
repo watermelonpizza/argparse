@@ -47,5 +47,20 @@ namespace argparse
 
             return arg;
         }
+
+        public IArgument<TOptions, TArgument> WithMultiArgument<TArgument>(Expression<Func<TOptions, IEnumerable<TArgument>>> argument)
+        {
+            PropertyInfo property = (argument.Body as MemberExpression).Member as PropertyInfo;
+
+            if (_arguments.Any(a => a.Property == property))
+            {
+                throw new ArgumentException($"Property '{property.Name}' has already been added to the catagory '{typeof(TOptions).Name}' and cannot be set twice.");
+            }
+
+            var arg = new MultiArgument<TOptions, TArgument>(_catagoryCreator, this, property);
+            _arguments.Add(arg);
+
+            return arg;
+        }
     }
 }

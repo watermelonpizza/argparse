@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -132,7 +133,7 @@ namespace argparse.UnitTests.ArgumentParserTests
                 .WithArgument(x => x.Byte)
                     .Flag('B');
 
-            parser.Parse("-B 10");
+            parser.Parse("-B", "10");
 
             Assert.Equal(10, parser.GetArgumentCatagory<BasicOptions>().Byte);
             Assert.False(parser.GetArgumentCatagory<BasicOptions>().Boolean);
@@ -146,11 +147,54 @@ namespace argparse.UnitTests.ArgumentParserTests
         public void ParserShouldPickupAValueOnNextArgument(string argument, string value)
         {
             ArgumentParser parser = new ArgumentParser();
-            parser.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.String);
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                .WithArgument(x => x.String)
+                    .Flag('s');
 
             parser.Parse(argument, value);
 
             Assert.Equal(value, parser.GetArgumentCatagory<BasicOptions>().String);
+        }
+
+        [Fact]
+        public void ParserShouldAddMultipleValuesOnMultiArguments()
+        {
+            ArgumentParser parser = new ArgumentParser();
+            parser
+                .CreateArgumentCatagory<MultiOptions>()
+                .WithMultiArgument(x => x.String)
+                    .Flag('s');
+
+            parser.Parse("--string", "value", "--string",  "value2", "-s", "val3"); 
+
+            List<string> values = parser.GetArgumentCatagory<MultiOptions>().String.ToList();
+
+            Assert.Equal(3, values.Count);
+            Assert.Equal("value", values[0]);
+            Assert.Equal("value2", values[1]);
+            Assert.Equal("val3", values[2]);
+        }
+
+        [Theory]
+        [InlineData(new[] { "" }, 0)]
+        [InlineData(new[] { "--integer" }, 1)]
+        [InlineData(new[] { "--integer", "--integer" }, 2)]
+        [InlineData(new[] { "-i" }, 1)]
+        [InlineData(new[] { "-i", "-i" }, 2)]
+        [InlineData(new[] { "-ii" }, 2)]
+        public void ParserShouldCountArgumentsOnArgumentsSetToBeCountable(string[] argument, int expectedCount)
+        {
+            ArgumentParser parser = new ArgumentParser();
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                .WithArgument(x => x.Integer)
+                    .Flag('i')
+                    .Countable();
+
+            parser.Parse(argument);
+
+            Assert.Equal(expectedCount, parser.GetArgumentCatagory<BasicOptions>().Integer);
         }
 
         #region Conversion to supported type tests
@@ -309,10 +353,10 @@ namespace argparse.UnitTests.ArgumentParserTests
         }
 
         [Theory]
-        [InlineData("--short", "-32768", short.MinValue)]
-        [InlineData("--short", "0", 0)]
-        [InlineData("--short", "2", 2)]
-        [InlineData("--short", "32767", short.MaxValue)]
+        [InlineData("--short-value", "-32768", short.MinValue)]
+        [InlineData("--short-value", "0", 0)]
+        [InlineData("--short-value", "2", 2)]
+        [InlineData("--short-value", "32767", short.MaxValue)]
         [InlineData("-s", "-32768", short.MinValue)]
         [InlineData("-s", "0", 0)]
         [InlineData("-s", "2", 2)]
@@ -428,7 +472,7 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = new ArgumentParser();
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Decimal)
+                .WithArgument(x => x.Float)
                     .Flag('f');
 
             parser.Parse(argument, value);

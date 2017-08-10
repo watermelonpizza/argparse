@@ -262,8 +262,8 @@ namespace argparse.UnitTests
         [Fact]
         public void ArgumentEnumerableArgumentTypeIsMultiple()
         {
-            IArgument<MultiOptions, IEnumerable<bool>> argument =
-                new ArgumentParser().CreateArgumentCatagory<MultiOptions>().WithArgument(x => x.Boolean);
+            IArgument<MultiOptions, string> argument =
+                new ArgumentParser().CreateArgumentCatagory<MultiOptions>().WithMultiArgument(x => x.String);
 
             Assert.True(argument.IsMultiple);
         }

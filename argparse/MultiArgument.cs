@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace argparse
 {
-    internal class Argument<TOptions, TArgument> : IArgument<TOptions, TArgument>, IProperty
+    internal class MultiArgument<TOptions, TArgument> : IArgument<TOptions, TArgument>, IMultiProperty
     {
         private IArgumentCatagory<TOptions> _currentCatagory;
         private ICreateArgumentCatagory _catagoryCreator;
@@ -64,10 +64,17 @@ namespace argparse
         /// </summary>
         public PropertyInfo Property { get; private set; }
 
-        public Argument(ICreateArgumentCatagory catagoryCreator, IArgumentCatagory<TOptions> currentCatagory, PropertyInfo property)
+        public MultiArgument(ICreateArgumentCatagory catagoryCreator, IArgumentCatagory<TOptions> currentCatagory, PropertyInfo property)
         {
             if (!ArgumentParser.SupportedTypes.Contains(typeof(TArgument)))
             {
+                if (typeof(TArgument) == typeof(bool))
+                {
+                    throw new ArgumentException(
+                        $"{typeof(TArgument).Name} is not supported as an argument type for '{property.Name}' on catagory '{typeof(TOptions).Name}'. Please use int type with {nameof(Countable)} function instead",
+                        nameof(TArgument));
+                }
+
                 throw new ArgumentException(
                     $"{typeof(TArgument).Name} is not supported as an argument type for '{property.Name}' on catagory '{typeof(TOptions).Name}'. Please use only one of the supported types as found in {nameof(ArgumentParser.SupportedTypes)}",
                     nameof(TArgument));
@@ -86,6 +93,54 @@ namespace argparse
 
             ArgumentName = ArgumentHelper.DefaultArgumentToString(property.Name);
             ArgumentType = typeof(TArgument);
+            IsMultiple = true;
+        }
+
+        public void AddValue(object obj)
+        {
+            if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
+
+            if (IsMultiple)
+            {
+                try
+                {
+                    ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
+
+                    // If the property is enumerable and if it's not null cast to a list, add the new value and set it back
+                    if (Property.GetValue(instance.CatagoryInstance) != null)
+                    {
+                        if (Property.GetValue(instance.CatagoryInstance) is IEnumerable<TArgument> propValue)
+                        {
+                            IList<TArgument> propListValue = propValue.ToList();
+                            propListValue.Add((TArgument)obj);
+                            Property.SetValue(instance.CatagoryInstance, propListValue);
+                        }
+                        else
+                        {
+                            // TODO: Can't be not IEnumerable<TArgument> (can't get here?)
+                        }
+                    }
+                    // Otherwise create a new list and set the property
+                    else
+                    {
+                        Property.SetValue(
+                            instance.CatagoryInstance,
+                            new List<TArgument>
+                            {
+                                (TArgument)obj
+                            });
+                    }
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            else
+            {
+                // TODO: Throw exception why cannot add to non multiple
+            }
         }
 
         public void SetValue(object obj)

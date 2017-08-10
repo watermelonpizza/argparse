@@ -42,6 +42,7 @@ namespace argparse
     internal static class ArgumentHelper
     {
         internal const string FlagMatchPattern = "^[A-Za-z0-9]$";
+        internal const string MultiFlagMatchPattern = "^[A-Za-z0-9]+$";
         internal const string NameMatchPattern = "^[a-z0-9][a-z0-9-]+$";
         internal const string CommandMatchPattern = "^[A-Za-z0-9]+$";
         internal const string DefaultModuleMatchPattern = "^[A-Za-z0-9_]+$";
@@ -69,7 +70,7 @@ namespace argparse
         {
             if (arg.StartsWith(WindowsArgumentPrefix))
             {
-                return (WindowsArgumentPrefix, arg.Substring(WindowsArgumentPrefix.Length).ToLowerInvariant());
+                return (WindowsArgumentPrefix, arg.Substring(WindowsArgumentPrefix.Length));
             }
             else if (arg == NamePrefix)
             {
@@ -77,11 +78,11 @@ namespace argparse
             }
             else if (arg.StartsWith(NamePrefix))
             {
-                return (NamePrefix, arg.Substring(NamePrefix.Length).ToLowerInvariant());
+                return (NamePrefix, arg.Substring(NamePrefix.Length));
             }
             else if (arg.StartsWith(FlagPrefix))
             {
-                return (FlagPrefix, arg.Substring(FlagPrefix.Length).ToLowerInvariant());
+                return (FlagPrefix, arg.Substring(FlagPrefix.Length));
             }
 
             return (null, arg);

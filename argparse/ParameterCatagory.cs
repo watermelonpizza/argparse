@@ -54,5 +54,27 @@ namespace argparse
 
             return arg;
         }
+
+        public IParameter<TArgumentOptions, TArgument> WithMultiParameter<TArgument>(Expression<Func<TArgumentOptions, IEnumerable<TArgument>>> argument)
+        {
+            PropertyInfo property = (argument.Body as MemberExpression).Member as PropertyInfo;
+
+            if (_parameters.Any(a => a.Property == property))
+            {
+                throw new ArgumentException($"Property '{property.Name}' has already been added to the catagory '{typeof(TArgumentOptions).Name}' and cannot be set twice.");
+            }
+
+            int position = _parameters.Count;
+            var arg = new MultiParamter<TArgumentOptions, TArgument>(_catagoryCreator, this, property, (uint)position);
+
+            if (arg.IsMultiple && _parameters.Any(p => p.IsMultiple))
+            {
+                throw new ArgumentException($"{argument.Name} is set to be a multi parameter but there is already one defined. You cannot have two multi-parameters in one catagory.", nameof(argument));
+            }
+
+            _parameters.Add(arg);
+
+            return arg;
+        }
     }
 }

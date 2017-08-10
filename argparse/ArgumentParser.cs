@@ -110,8 +110,6 @@ namespace argparse
                 string nextArg = i + 1 < args.Length ? args[i + 1] : null;
                 string[] nextAllArgs = args.Skip(i + 1).ToArray();
 
-                bool nextArgIsArgument = nextArg != null ? ArgumentHelper.IsArgument(nextArg) : false;
-
                 var strippedArgument = ArgumentHelper.StripArgument(arg);
 
                 // If it is an argument, get the argument if exists
@@ -119,11 +117,9 @@ namespace argparse
                 // or count/multiple if the case may be
                 if (ArgumentHelper.IsArgument(arg))
                 {
-                    var strip = ArgumentHelper.StripArgument(arg);
-
-                    if (strip.prefix == ArgumentHelper.WindowsArgumentPrefix)
+                    if (strippedArgument.prefix == ArgumentHelper.WindowsArgumentPrefix)
                     {
-                        var findNameResult = FindNameAndSetProperty(strip, nextArg, nextArgIsArgument);
+                        var findNameResult = FindNameAndSetProperty(strippedArgument, nextArg);
 
                         if (findNameResult.success)
                         {
@@ -132,7 +128,7 @@ namespace argparse
                         }
                         else
                         {
-                            var findFlagResult = FindFlagAndSetProperty(strip, nextArg, nextArgIsArgument);
+                            var findFlagResult = FindFlagAndSetProperty(strippedArgument, nextArg);
 
                             if (findFlagResult.success && findFlagResult.nextArgumentUsed)
                                 i++;
@@ -142,21 +138,21 @@ namespace argparse
                     // Set the rest of the arguments to the gloabal Passthrough variable and return.
                     // The user can check the Passthrough property if the command (if we are in one)
                     // or something needs external arguments
-                    else if (strip.prefix == ArgumentHelper.NamePrefix && string.IsNullOrEmpty(strip.argument))
+                    else if (strippedArgument.prefix == ArgumentHelper.NamePrefix && string.IsNullOrEmpty(strippedArgument.argument))
                     {
                         Passthrough = nextAllArgs;
                         return;
                     }
-                    else if (strip.prefix == ArgumentHelper.NamePrefix)
+                    else if (strippedArgument.prefix == ArgumentHelper.NamePrefix)
                     {
-                        var findNameResult = FindNameAndSetProperty(strip, nextArg, nextArgIsArgument);
+                        var findNameResult = FindNameAndSetProperty(strippedArgument, nextArg);
 
                         if (findNameResult.success && findNameResult.nextArgumentUsed)
                             i++;
                     }
-                    else if (strip.prefix == ArgumentHelper.FlagPrefix)
+                    else if (strippedArgument.prefix == ArgumentHelper.FlagPrefix)
                     {
-                        var findFlagResult = FindFlagAndSetProperty(strip, nextArg, nextArgIsArgument);
+                        var findFlagResult = FindFlagAndSetProperty(strippedArgument, nextArg);
 
                         if (findFlagResult.success && findFlagResult.nextArgumentUsed)
                             i++;
@@ -220,8 +216,8 @@ namespace argparse
                                     try
                                     {
                                         // Call the internal add method to add to the property
-                                        var convertedType = Convert.ChangeType(strippedArgument.argument, parameter.ParameterType);
-                                        property.AddIfMultiple(convertedType);
+                                        var convertedType = ConversionHelper.Convert(strippedArgument.argument, parameter.ParameterType);
+                                        ((IMultiProperty)property).AddValue(convertedType);
                                     }
                                     catch (Exception)
                                     {
@@ -232,7 +228,7 @@ namespace argparse
                                 {
                                     try
                                     {
-                                        var convertedType = Convert.ChangeType(strippedArgument.argument, parameter.ParameterType);
+                                        var convertedType = ConversionHelper.Convert(strippedArgument.argument, parameter.ParameterType);
                                         property.SetValue(convertedType);
                                     }
                                     catch (Exception)
@@ -254,8 +250,8 @@ namespace argparse
                                     try
                                     {
                                         // Call the internal add method to add to the property
-                                        var convertedType = Convert.ChangeType(strippedArgument.argument, parameter.ParameterType);
-                                        property.AddIfMultiple(convertedType);
+                                        var convertedType = ConversionHelper.Convert(strippedArgument.argument, parameter.ParameterType);
+                                        ((IMultiProperty)property).AddValue(convertedType);
                                     }
                                     catch (Exception)
                                     {
@@ -273,7 +269,7 @@ namespace argparse
             }
         }
 
-        private (bool success, bool nextArgumentUsed) FindNameAndSetProperty((string prefix, string argument) arg, string nextArg, bool nextArgIsArgument)
+        private (bool success, bool nextArgumentUsed) FindNameAndSetProperty((string prefix, string argument) arg, string nextArg)
         {
             // TODO: Parse Enum values sparately, check if name matches any enum case insensitive
             // TODO: Support Enum Flags attribute (inherintly multi). Throw exception on IEnumerable<Enum> which is flags. Can't have multiple multiple options.
@@ -283,117 +279,117 @@ namespace argparse
             IArgument argument = 
                 _argumentCatagories
                     .SelectMany(ac => ac.Arguments)
-                    .SingleOrDefault(a => arg.argument.StartsWith(a.ArgumentName));
+                    .SingleOrDefault(a => arg.argument.ToLowerInvariant().StartsWith(a.ArgumentName.ToLowerInvariant()));
 
             if (argument != null)
             {
                 IProperty property = argument as IProperty;
 
-                // Found the argument.
-                if (arg.argument.StartsWith(argument.ArgumentName))
+                // If the argument requires a value, i.e. it isn't a flaggable argument and it's multiple or countable
+                // then this argument will require a value
+                bool argumentRequiresValue = !argument.IsCountable && argument.ArgumentType != typeof(bool);
+
+                // Check if the argument has a parameter or not
+                // If the length of the argument is the same as the name, 
+                // there isn't any argument value here, might be on nextArg if allowed
+                if (arg.argument.Length == argument.ArgumentName.Length)
                 {
-                    // Check if the argument has a parameter or not
-                    // If the length of the argument is the same as the name, 
-                    // there isn't any argument value here, might be on nextArg if allowed
-                    if (arg.argument.Length == argument.ArgumentName.Length)
+                    if (argument.IsCountable)
                     {
-                        if (argument.IsCountable)
-                        {
-                            int count = Convert.ToInt32(property.GetValue()) + 1;
-                            property.SetValue(count);
+                        int count = Convert.ToInt32(property.GetValue()) + 1;
+                        property.SetValue(count);
 
-                            return (success: true, nextArgumentUsed: false);
-                        }
-                        // If the argument is multiple and the next argument isn't an argument
-                        // Then the next argument is a value for this argument
-                        else if (argument.IsMultiple && !nextArgIsArgument)
+                        return (success: true, nextArgumentUsed: false);
+                    }
+                    // If the argument is multiple and the next argument isn't null
+                    // Then the next argument is a value for this argument
+                    else if (argument.IsMultiple && nextArg != null)
+                    {
+                        try
                         {
-                            try
-                            {
-                                // Call the internal add method to add to the property
-                                var convertedType = Convert.ChangeType(nextArg, argument.ArgumentType);
-                                property.AddIfMultiple(convertedType);
+                            // Call the internal add method to add to the property
+                            var convertedType = ConversionHelper.Convert(nextArg, argument.ArgumentType);
+                            ((IMultiProperty)property).AddValue(convertedType);
 
-                                // We need to leave here as let the parent know we have used the next argument as well as this one
-                                return (success: true, nextArgumentUsed: true);
-                            }
-                            catch (Exception)
-                            {
-                                // TODO: Catch exception and let users know of why failed to cast.
-                            }
+                            // We need to leave here as let the parent know we have used the next argument as well as this one
+                            return (success: true, nextArgumentUsed: true);
                         }
-                        else if (argument.IsMultiple && nextArgIsArgument)
+                        catch (Exception)
                         {
-                            // TODO: Throw exception, cannot have multiple without an argument parameter
-                        }
-                        // The next argument isn't an argument and this isn't a flag (not bool) so set this argument to the nextArg
-                        else if (argument.ArgumentType != typeof(bool) && !nextArgIsArgument)
-                        {
-                            try
-                            {
-                                // Call the internal add method to add to the property
-                                var convertedType = Convert.ChangeType(nextArg, argument.ArgumentType);
-                                property.SetValue(convertedType);
-
-                                // We need to leave here as let the parent know we have used the next argument as well as this one
-                                return (success: true, nextArgumentUsed: true);
-                            }
-                            catch (Exception)
-                            {
-                                // TODO: Catch exception and let users know of why failed to cast.
-                            }
-                        }
-                        else if (argument.ArgumentType != typeof(bool) && nextArgIsArgument)
-                        {
-                            // TODO: Throw exception, cannot have non bool argument without value
-                        }
-                        // Otherwise after all that it must be a flag so set to true
-                        else
-                        {
-                            property.SetValue(true);
-                            return (success: true, nextArgumentUsed: false);
+                            // TODO: Catch exception and let users know of why failed to cast.
                         }
                     }
-                    // If the next character of the argument is a deliminator: 
-                    // substring on the delim and set to property of the argument
-                    else if (arg.argument[argument.ArgumentName.Length] == ArgumentHelper.WindowsDeliminator || arg.argument[argument.ArgumentName.Length] == ArgumentHelper.Deliminator)
+                    else if (argument.IsMultiple && nextArg == null)
                     {
-                        string argumentValue = arg.argument.Substring(argument.ArgumentName.Length + 1);
-
-                        if (argument.IsCountable)
+                        // TODO: Throw exception, cannot have multiple without an argument parameter
+                    }
+                    // The next argument isn't an argument and this isn't a flag (not bool) so set this argument to the nextArg
+                    else if (argumentRequiresValue && nextArg != null)
+                    {
+                        try
                         {
-                            // TODO: Throw exception, cannot have argument on countable
+                            // Call the internal add method to add to the property
+                            var convertedType = ConversionHelper.Convert(nextArg, argument.ArgumentType);
+                            property.SetValue(convertedType);
+
+                            // We need to leave here as let the parent know we have used the next argument as well as this one
+                            return (success: true, nextArgumentUsed: true);
                         }
-                        // If it's multiple we need to get the instance of the enumerable, cast the to type
-                        // and add to that enumerable
-                        else if (argument.IsMultiple)
+                        catch (Exception)
                         {
-                            try
-                            {
-                                // Call the internal add method to add to the property
-                                var convertedType = Convert.ChangeType(argumentValue, argument.ArgumentType);
-                                property.AddIfMultiple(convertedType);
-
-                                return (success: true, nextArgumentUsed: false);
-                            }
-                            catch (Exception)
-                            {
-                                // TODO: Catch exception and let users know of why failed to cast.
-                            }
+                            // TODO: Catch exception and let users know of why failed to cast.
                         }
-                        else
-                        {
-                            try
-                            {
-                                var convertedType = Convert.ChangeType(argumentValue, argument.ArgumentType);
-                                property.SetValue(convertedType);
+                    }
+                    else if (argumentRequiresValue && nextArg == null)
+                    {
+                        // TODO: Throw exception, cannot have non bool argument without value
+                    }
+                    // Otherwise after all that it must be a flag so set to true
+                    else
+                    {
+                        property.SetValue(true);
+                        return (success: true, nextArgumentUsed: false);
+                    }
+                }
+                // If the next character of the argument is a deliminator: 
+                // substring on the delim and set to property of the argument
+                else if (arg.argument[argument.ArgumentName.Length] == ArgumentHelper.WindowsDeliminator || arg.argument[argument.ArgumentName.Length] == ArgumentHelper.Deliminator)
+                {
+                    string argumentValue = arg.argument.Substring(argument.ArgumentName.Length + 1);
 
-                                return (success: true, nextArgumentUsed: false);
-                            }
-                            catch (Exception)
-                            {
-                                // TODO: Catch exception and let users know of why failed to cast.
-                            }
+                    if (argument.IsCountable)
+                    {
+                        // TODO: Throw exception, cannot have argument on countable
+                    }
+                    // If it's multiple we need to get the instance of the enumerable, cast the to type
+                    // and add to that enumerable
+                    else if (argument.IsMultiple)
+                    {
+                        try
+                        {
+                            // Call the internal add method to add to the property
+                            var convertedType = ConversionHelper.Convert(argumentValue, argument.ArgumentType);
+                            ((IMultiProperty)property).AddValue(convertedType);
+
+                            return (success: true, nextArgumentUsed: false);
+                        }
+                        catch (Exception)
+                        {
+                            // TODO: Catch exception and let users know of why failed to cast.
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var convertedType = ConversionHelper.Convert(argumentValue, argument.ArgumentType);
+                            property.SetValue(convertedType);
+
+                            return (success: true, nextArgumentUsed: false);
+                        }
+                        catch (Exception)
+                        {
+                            // TODO: Catch exception and let users know of why failed to cast.
                         }
                     }
                 }
@@ -406,7 +402,7 @@ namespace argparse
             return (false, false);
         }
 
-        private (bool success, bool nextArgumentUsed) FindFlagAndSetProperty((string prefix, string argument) arg, string nextArg, bool nextArgIsArgument)
+        private (bool success, bool nextArgumentUsed) FindFlagAndSetProperty((string prefix, string argument) arg, string nextArg)
         {
             // If the argument is only one long then the only charater must be a flag
             // and the next argument may be the argument value
@@ -423,6 +419,10 @@ namespace argparse
                 {
                     IProperty property = argument as IProperty;
 
+                    // If the argument requires a value, i.e. it isn't a flaggable argument and it's multiple or countable
+                    // then this argument will require a value
+                    bool argumentRequiresValue = !argument.IsCountable && argument.ArgumentType != typeof(bool);
+
                     if (argument.IsCountable)
                     {
                         int count = Convert.ToInt32(property.GetValue()) + 1;
@@ -430,15 +430,15 @@ namespace argparse
 
                         return (success: true, nextArgumentUsed: false);
                     }
-                    // If the argument is multiple and the next argument isn't an argument
+                    // If the argument is multiple and the next argument isn't an null
                     // Then the next argument is a value for this argument
-                    else if (argument.IsMultiple && !nextArgIsArgument)
+                    else if (argument.IsMultiple && nextArg != null)
                     {
                         try
                         {
                             // Call the internal add method to add to the property
-                            var convertedType = Convert.ChangeType(nextArg, argument.ArgumentType);
-                            property.AddIfMultiple(convertedType);
+                            var convertedType = ConversionHelper.Convert(nextArg, argument.ArgumentType);
+                            ((IMultiProperty)property).AddValue(convertedType);
 
                             // We need to leave here as let the parent know we have used the next argument as well as this one
                             return (success: true, nextArgumentUsed: true);
@@ -448,17 +448,17 @@ namespace argparse
                             // TODO: Catch exception and let users know of why failed to cast.
                         }
                     }
-                    else if (argument.IsMultiple && nextArgIsArgument)
+                    else if (argument.IsMultiple && nextArg == null)
                     {
                         // TODO: Throw exception, cannot have multiple without an argument parameter
                     }
                     // The next argument isn't an argument and this isn't a flag (not bool) so set this argument to the nextArg
-                    else if (argument.ArgumentType != typeof(bool) && !nextArgIsArgument)
+                    else if (argumentRequiresValue && nextArg != null)
                     {
                         try
                         {
                             // Call the internal add method to add to the property
-                            var convertedType = Convert.ChangeType(nextArg, argument.ArgumentType);
+                            var convertedType = ConversionHelper.Convert(nextArg, argument.ArgumentType);
                             property.SetValue(convertedType);
 
                             // We need to leave here as let the parent know we have used the next argument as well as this one
@@ -469,7 +469,7 @@ namespace argparse
                             // TODO: Catch exception and let users know of why failed to cast.
                         }
                     }
-                    else if (argument.ArgumentType != typeof(bool) && nextArgIsArgument)
+                    else if (argumentRequiresValue && nextArg == null)
                     {
                         // TODO: Throw exception, cannot have non bool argument without value
                     }
@@ -491,8 +491,10 @@ namespace argparse
             {
                 // Check if the argument is just a collection of flags (can't have argument value without delim)
                 // Can't work on windows prefix system (cannot tell between collection of flags and name)
-                if (arg.prefix != ArgumentHelper.WindowsArgumentPrefix && Regex.IsMatch(arg.argument, ArgumentHelper.FlagMatchPattern))
+                if (arg.prefix != ArgumentHelper.WindowsArgumentPrefix && Regex.IsMatch(arg.argument, ArgumentHelper.MultiFlagMatchPattern))
                 {
+                    bool success = true;
+
                     foreach (char flag in arg.argument)
                     {
                         // Find the flag and if it exists then set the property accordingly
@@ -508,19 +510,19 @@ namespace argparse
                             {
                                 int count = Convert.ToInt32(property.GetValue()) + 1;
                                 property.SetValue(count);
-
-                                return (success: true, nextArgumentUsed: false);
                             }
                             else if (argument.IsMultiple)
                             {
                                 // TODO: Throw exception, this is a flag collection and cannot support multiple yet
                             }
                             // It's a flag so set to true
-                            else
+                            else if (argument.ArgumentType == typeof(bool))
                             {
                                 property.SetValue(true);
-
-                                return (success: true, nextArgumentUsed: false);
+                            }
+                            else
+                            {
+                                // TODO: Throw excpetion, cannot use value required argument in flag list
                             }
                         }
                         else
@@ -528,6 +530,8 @@ namespace argparse
                             // TODO: Throw exception, flag not found
                         }
                     }
+
+                    return (success: success, nextArgumentUsed: false);
                 }
                 else if (arg.argument[1] == ArgumentHelper.WindowsDeliminator || arg.argument[1] == ArgumentHelper.Deliminator)
                 {
@@ -554,8 +558,8 @@ namespace argparse
                             try
                             {
                                 // Call the internal add method to add to the property
-                                var convertedType = Convert.ChangeType(argumentValue, argument.ArgumentType);
-                                property.AddIfMultiple(convertedType);
+                                var convertedType = ConversionHelper.Convert(argumentValue, argument.ArgumentType);
+                                ((IMultiProperty)property).AddValue(convertedType);
 
                                 return (success: true, nextArgumentUsed: false);
                             }
@@ -569,7 +573,7 @@ namespace argparse
                         {
                             try
                             {
-                                var convertedType = Convert.ChangeType(argumentValue, argument.ArgumentType);
+                                var convertedType = ConversionHelper.Convert(argumentValue, argument.ArgumentType);
                                 property.SetValue(convertedType);
 
                                 return (success: true, nextArgumentUsed: false);
@@ -613,7 +617,6 @@ namespace argparse
             typeof(string),
             typeof(DateTime),
             typeof(Enum),
-            typeof(IEnumerable<bool>),
             typeof(IEnumerable<byte>),
             typeof(IEnumerable<sbyte>),
             typeof(IEnumerable<short>),

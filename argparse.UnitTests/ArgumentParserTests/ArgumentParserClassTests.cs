@@ -106,12 +106,6 @@ namespace argparse.UnitTests.ArgumentParserTests
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_bool()
-        {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<bool>)));
-        }
-
-        [Fact]
         public void ArgumentParserSupportsType_IEnumerable_byte()
         {
             Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<byte>)));

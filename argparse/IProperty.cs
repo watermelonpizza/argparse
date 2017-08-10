@@ -9,10 +9,13 @@ namespace argparse
     {
         PropertyInfo Property { get; }
 
-        void AddIfMultiple(object obj);
-
         void SetValue(object obj);
 
         object GetValue();
+    }
+
+    internal interface IMultiProperty : IProperty
+    {
+        void AddValue(object obj);
     }
 }
