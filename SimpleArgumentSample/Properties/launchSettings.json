@@ -2,7 +2,7 @@
   "profiles": {
     "SimpleArgumentSample": {
       "commandName": "Project",
-      "commandLineArgs": "--string:value"
+      "commandLineArgs": "--string file1.txt,file2.txt,\"comma\, part of file.txt\",file4.txt --other value /t:343 /f"
     }
   }
 }

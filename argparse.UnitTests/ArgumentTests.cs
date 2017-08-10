@@ -268,6 +268,9 @@ namespace argparse.UnitTests
             Assert.True(argument.IsMultiple);
         }
 
+        // TODO: Create enum tests for enum, multi enum (non flags), and flags (non multi)
+        // TODO: Create exception test for IsMultiple on flags
+
         [Fact]
         public void ArgumentEnumerableTypesNotSupportedExceptIEnumerable()
         {

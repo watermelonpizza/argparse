@@ -68,8 +68,13 @@ namespace SimpleArgumentSample
 
             //ConfigCommands cc = c.Config.GetArgumentCatagory<ConfigCommands>();
 
-            ArgumentParser.Default.CreateArgumentCatagory<GeneralOptions>().WithArgument(x => x.String);
-            ArgumentParser.Default.Parse(args);
+            foreach (var item in args)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine();
+            //ArgumentParser.Default.CreateArgumentCatagory<GeneralOptions>().WithArgument(x => x.String);
+            //ArgumentParser.Default.Parse(args);
 
         }
 

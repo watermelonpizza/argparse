@@ -275,17 +275,22 @@ namespace argparse
 
         private (bool success, bool nextArgumentUsed) FindNameAndSetProperty((string prefix, string argument) arg, string nextArg, bool nextArgIsArgument)
         {
+            // TODO: Parse Enum values sparately, check if name matches any enum case insensitive
+            // TODO: Support Enum Flags attribute (inherintly multi). Throw exception on IEnumerable<Enum> which is flags. Can't have multiple multiple options.
+            // TODO: Parse multi values as comma seperated lists like: --files file1.txt,file2.txt,"file 3.txt"
+            // TODO: Parse DateTime values as possible ticks
+
             IArgument argument = 
                 _argumentCatagories
                     .SelectMany(ac => ac.Arguments)
-                    .SingleOrDefault(a => a.ArgumentName.StartsWith(arg.argument));
+                    .SingleOrDefault(a => arg.argument.StartsWith(a.ArgumentName));
 
             if (argument != null)
             {
                 IProperty property = argument as IProperty;
 
                 // Found the argument.
-                if (argument.ArgumentName.StartsWith(arg.argument))
+                if (arg.argument.StartsWith(argument.ArgumentName))
                 {
                     // Check if the argument has a parameter or not
                     // If the length of the argument is the same as the name, 
@@ -353,7 +358,7 @@ namespace argparse
                     // substring on the delim and set to property of the argument
                     else if (arg.argument[argument.ArgumentName.Length] == ArgumentHelper.WindowsDeliminator || arg.argument[argument.ArgumentName.Length] == ArgumentHelper.Deliminator)
                     {
-                        string argumentValue = arg.argument.Substring(argument.ArgumentName.Length);
+                        string argumentValue = arg.argument.Substring(argument.ArgumentName.Length + 1);
 
                         if (argument.IsCountable)
                         {

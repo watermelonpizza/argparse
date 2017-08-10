@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace argparse.UnitTests
+namespace argparse.UnitTests.ArgumentParserTests
 {
-    public class ArgumentParserTests
+    public class ArgumentParserClassTests
     {
         [Fact]
         public void ArgumentParserStaticDefaultInstanceIsInstantiated()
