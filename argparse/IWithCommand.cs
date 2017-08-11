@@ -10,6 +10,6 @@ namespace argparse
     {
         ICommand<TOptions> WithCommand(Expression<Func<TOptions, bool>> command);
 
-        ICommand<TOptions> WithCommand(Expression<Func<TOptions, IArgumentParser>> command, Action<IArgumentParser> parser);
+        ICommand<TOptions> WithCommand(Expression<Func<TOptions, ICommandArgumentParser>> command, Action<IArgumentParser> parser);
     }
 }

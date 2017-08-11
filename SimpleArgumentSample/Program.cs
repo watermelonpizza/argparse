@@ -28,53 +28,53 @@ namespace SimpleArgumentSample
         // Usage: app [OPTIONS] SCOPE [BasicArgumentParser]
         static void Main(string[] args)
         {
-            //ArgumentParser
-            //    .Default
-            //    .CreateArgumentCatagory<GeneralOptions>()
-            //        .WithArgument(x => x.Flag)
-            //            .Required()
-            //            .Name("blah")
-            //        .WithArgument(x => x.CountMe)
-            //    .CreateArgumentCatagory<NetworkOptions>()
-            //        .WithArgument(x => x.Integer)
-            //            .Name("intplx")
-            //            .Flag('i');
+            ArgumentParser
+                .Default
+                .CreateArgumentCatagory<GeneralOptions>()
+                    .WithArgument(x => x.Flag)
+                        .Required()
+                        .Name("blah")
+                    .WithArgument(x => x.CountMe)
+                .CreateArgumentCatagory<NetworkOptions>()
+                    .WithArgument(x => x.Integer)
+                        .Name("intplx")
+                        .Flag('i');
 
-            //ArgumentParser
-            //    .Default
-            //    .CreateParameterCatagory<PositionalOptions>()
-            //        .WithParameter(x => x.Source)
-            //            .Name("string")
-            //        .WithParameter(x => x.Destination)
-            //            .Name("dest");
+            ArgumentParser
+                .Default
+                .CreateParameterCatagory<PositionalOptions>()
+                    .WithParameter(x => x.Source)
+                        .Name("string")
+                    .WithParameter(x => x.Destination)
+                        .Name("dest");
 
-            //ArgumentParser
-            //    .Default
-            //    .CreateCommandCatagory<Commands>()
-            //        .Name("comANDS")
-            //        .WithCommand(x => x.Config, SetupConfigCommand)
-            //            .Help("THis is config")
-            //    .CreateCommandCatagory<SimpleCommands>()
-            //        .WithCommand(x => x.Config);
+            ArgumentParser
+                .Default
+                .CreateCommandCatagory<Commands>()
+                    .Name("comANDS")
+                    .WithCommand(x => x.Config, SetupConfigCommand)
+                        .Help("THis is config")
+                .CreateCommandCatagory<SimpleCommands>()
+                    .WithCommand(x => x.Config);
 
-            //ArgumentParser.Default.Parse(args);
+            ArgumentParser.Default.Parse(args);
 
-            //GeneralOptions go = ArgumentParser.Default.GetArgumentCatagory<GeneralOptions>();
-            //NetworkOptions no = ArgumentParser.Default.GetArgumentCatagory<NetworkOptions>();
-            //PositionalOptions po = ArgumentParser.Default.GetParameterCatagory<PositionalOptions>();
+            GeneralOptions go = ArgumentParser.Default.GetArgumentCatagory<GeneralOptions>();
+            NetworkOptions no = ArgumentParser.Default.GetArgumentCatagory<NetworkOptions>();
+            PositionalOptions po = ArgumentParser.Default.GetParameterCatagory<PositionalOptions>();
 
-            //Commands c = ArgumentParser.Default.GetCommandCatagory<Commands>();
-            //SimpleCommands sc = ArgumentParser.Default.GetCommandCatagory<SimpleCommands>();
+            Commands c = ArgumentParser.Default.GetCommandCatagory<Commands>();
+            SimpleCommands sc = ArgumentParser.Default.GetCommandCatagory<SimpleCommands>();
 
-            //ConfigCommands cc = c.Config.GetArgumentCatagory<ConfigCommands>();
+            ConfigCommands cc = c.Config.GetArgumentCatagory<ConfigCommands>();
 
             foreach (var item in args)
             {
                 Console.WriteLine(item);
             }
             Console.WriteLine();
-            //ArgumentParser.Default.CreateArgumentCatagory<GeneralOptions>().WithArgument(x => x.String);
-            //ArgumentParser.Default.Parse(args);
+            ArgumentParser.Default.CreateArgumentCatagory<GeneralOptions>().WithArgument(x => x.String);
+            ArgumentParser.Default.Parse(args);
 
         }
 
@@ -112,7 +112,7 @@ namespace SimpleArgumentSample
 
     class Commands
     {
-        public IArgumentParser Config { get; set; }
+        public ICommandArgumentParser Config { get; set; }
     }
 
     class SimpleCommands

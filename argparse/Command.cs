@@ -20,6 +20,13 @@ namespace argparse
 
         public Command(ICreateCommandCatagory catagoryCreator, ICommandCatagory<TOptions> currentCatagory, PropertyInfo property)
         {
+            if (property.GetMethod == null || property.SetMethod == null)
+            {
+                throw new ArgumentException(
+                    $"Property '{property.Name}' must have both a get and set accessor on catagory '{typeof(TOptions).Name}'.",
+                    nameof(property));
+            }
+
             _catagoryCreator = catagoryCreator;
             _currentCatagory = currentCatagory;
             Property = property;
@@ -65,7 +72,7 @@ namespace argparse
             return _currentCatagory.WithCommand(command);
         }
 
-        public ICommand<TOptions> WithCommand(Expression<Func<TOptions, IArgumentParser>> command, Action<IArgumentParser> parser)
+        public ICommand<TOptions> WithCommand(Expression<Func<TOptions, ICommandArgumentParser>> command, Action<IArgumentParser> parser)
         {
             return _currentCatagory.WithCommand(command, parser);
         }

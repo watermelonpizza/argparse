@@ -552,5 +552,30 @@ namespace argparse.UnitTests.ArgumentParserTests
 
 
         #endregion
+
+        [Fact]
+        public void ParserShouldSetCommandToTrueIfCommandIsFound()
+        {
+            ArgumentParser parser = new ArgumentParser();
+            parser.CreateCommandCatagory<Commands>()
+                .WithCommand(x => x.FlagCommand);
+
+            parser.Parse("flagcommand");
+
+            Assert.True(parser.GetCommandCatagory<Commands>().FlagCommand);
+        }
+
+        [Fact]
+        public void ParserShouldSetArgumentOnCommandIfCommandIsFound()
+        {
+            ArgumentParser parser = new ArgumentParser();
+            parser.CreateCommandCatagory<Commands>()
+                .WithCommand(x => x.CommandWithArguments, (cp) => cp.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean));
+
+            parser.Parse("commandwitharguments", "--boolean");
+
+            Assert.True(parser.GetCommandCatagory<Commands>().CommandWithArguments.Selected);
+            Assert.True(parser.GetCommandCatagory<Commands>().CommandWithArguments.GetArgumentCatagory<BasicOptions>().Boolean);
+        }
     }
 }

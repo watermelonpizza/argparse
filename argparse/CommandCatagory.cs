@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
 namespace argparse
 {
-    internal class CommandCatagory<TOptions> : ICommandCatagory<TOptions>
+    internal class CommandCatagory<TOptions> : ICommandCatagory<TOptions>, ICatagoryInstance
         where TOptions : class, new()
     {
         private ICreateCommandCatagory _catagoryCreator;
@@ -35,20 +36,25 @@ namespace argparse
         {
             PropertyInfo property = (command.Body as MemberExpression).Member as PropertyInfo;
 
+            if (_commands.Any(a => a.Property == property))
+            {
+                throw new ArgumentException($"Command '{property.Name}' has already been added to the catagory '{typeof(TOptions).Name}' and cannot be set twice.");
+            }
+
             var cmd = new Command<TOptions>(_catagoryCreator, this, property);
             _commands.Add(cmd);
 
             return cmd;
         }
 
-        public ICommand<TOptions> WithCommand(Expression<Func<TOptions, IArgumentParser>> command, Action<IArgumentParser> parser)
+        public ICommand<TOptions> WithCommand(Expression<Func<TOptions, ICommandArgumentParser>> command, Action<IArgumentParser> parser)
         {
             PropertyInfo property = (command.Body as MemberExpression).Member as PropertyInfo;
 
             var cmd = new Command<TOptions>(_catagoryCreator, this, property);
             _commands.Add(cmd);
 
-            IArgumentParser commandArgParser = new ArgumentParser();
+            ICommandArgumentParser commandArgParser = new CommandArgumentParser();
             parser(commandArgParser);
 
             property.SetValue(CatagoryInstance, commandArgParser);

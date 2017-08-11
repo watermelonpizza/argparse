@@ -98,120 +98,74 @@ namespace argparse.UnitTests
             Assert.Equal("property-with-tla-1-number", argument.ArgumentName);
         }
 
-        [Fact]
-        public void ArgumentNameMethodSetsName()
+        [Theory]
+        [InlineData("name")]
+        [InlineData("custom-name")]
+        [InlineData("ipv4")]
+        [InlineData("ip-v6")]
+        [InlineData("1234")]
+        [InlineData("12things")]
+        public void ArgumentNameMethodAllowedNames(string argumentName)
         {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name("custom-name");
+            IArgument<NameOptions, bool> argument =
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name(argumentName);
 
-            Assert.Equal("custom-name", argument.ArgumentName);
+            Assert.Equal(argumentName, argument.ArgumentName);
         }
 
-        [Fact]
-        public void ArgumentNameMethodSingleCharacterShouldThrowArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData("UP")]
+        [InlineData("a!")]
+        [InlineData("a#")]
+        [InlineData("a)")]
+        [InlineData("a%")]
+        [InlineData("a'")]
+        [InlineData("a>")]
+        [InlineData("a🍉")]
+        [InlineData("!a")]
+        [InlineData("🍉-myname")]
+        [InlineData("-abc")]
+        [InlineData("abc bbb")]
+        [InlineData("-abc bbb")]
+        [InlineData(" ")]
+        public void ArgumentNameMethodDissallowedNamesShouldThrowArgumentException(string argumentName)
         {
-            IArgument<NameOptions, int> argument =
+            IArgument<NameOptions, bool> argument =
                 new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
-            Assert.Throws<ArgumentException>(() => argument.Name("a"));
+            Assert.Throws<ArgumentException>(() => argument.Name(argumentName));
         }
 
-        [Fact]
-        public void ArgumentNameMethodUpperCaseValuesShouldThrowArgumentException()
+        [Theory]
+        [InlineData('a')]
+        [InlineData('A')]
+        [InlineData('4')]
+        public void ArgumentFlagMethodAllowedNames(char flag)
         {
-            IArgument<NameOptions, int> argument =
+            IArgument<NameOptions, bool> argument =
+                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag(flag);
+
+            Assert.Equal(flag, argument.ArgumentFlag);
+        }
+
+
+        [Theory]
+        [InlineData('!')]
+        [InlineData('~')]
+        [InlineData(';')]
+        [InlineData('"')]
+        [InlineData('<')]
+        [InlineData('.')]
+        [InlineData('-')]
+        [InlineData('?')]
+        [InlineData(' ')]
+        public void ArgumentFlagMethodDissallowedFlagsShouldThrowArgumentException(char flag)
+        {
+            IArgument<NameOptions, bool> argument =
                 new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
 
-            Assert.Throws<ArgumentException>(() => argument.Name("UP"));
-        }
-
-        [Fact]
-        public void ArgumentNameMethodSymbolsShouldThrowArgumentException()
-        {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
-
-            Assert.Throws<ArgumentException>(() => argument.Name("a!"));
-            Assert.Throws<ArgumentException>(() => argument.Name("a#"));
-            Assert.Throws<ArgumentException>(() => argument.Name("a)"));
-            Assert.Throws<ArgumentException>(() => argument.Name("a%"));
-            Assert.Throws<ArgumentException>(() => argument.Name("a'"));
-            Assert.Throws<ArgumentException>(() => argument.Name("a>"));
-            Assert.Throws<ArgumentException>(() => argument.Name("a🍉"));
-        }
-
-        [Fact]
-        public void ArgumentNameMethodOnlyNumbersPasses()
-        {
-            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name("1234");
-            Assert.Equal("1234", argument.ArgumentName);
-        }
-
-        [Fact]
-        public void ArgumentNameMethodStartsWithNumberPasses()
-        {
-            IArgument argument = new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Name("1abc");
-            Assert.Equal("1abc", argument.ArgumentName);
-        }
-
-        [Fact]
-        public void ArgumentNameMethodStartsWithHyphenShouldThrowArgumentException()
-        {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
-
-            Assert.Throws<ArgumentException>(() => argument.Name("-abc"));
-        }
-
-        [Fact]
-        public void ArgumentNameMethodSpaceShouldThrowArgumentException()
-        {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
-
-            Assert.Throws<ArgumentException>(() => argument.Name("aaa bbb"));
-        }
-
-        [Fact]
-        public void ArgumentFlagMethodSetsFlag()
-        {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('a');
-
-            Assert.Equal('a', argument.ArgumentFlag);
-        }
-
-        [Fact]
-        public void ArgumentFlagCanSupportUpperCase()
-        {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('A');
-
-            Assert.Equal('A', argument.ArgumentFlag);
-        }
-
-        [Fact]
-        public void ArgumentFlagCanSupportNumbers()
-        {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty).Flag('1');
-
-            Assert.Equal('1', argument.ArgumentFlag);
-        }
-
-        [Fact]
-        public void ArgumentFlagSymbolShouldThrowArgumentException()
-        {
-            IArgument<NameOptions, int> argument =
-                new ArgumentParser().CreateArgumentCatagory<NameOptions>().WithArgument(x => x.PascalCaseProperty);
-
-            Assert.Throws<ArgumentException>(() => argument.Flag('!'));
-            Assert.Throws<ArgumentException>(() => argument.Flag('~'));
-            Assert.Throws<ArgumentException>(() => argument.Flag(';'));
-            Assert.Throws<ArgumentException>(() => argument.Flag('"'));
-            Assert.Throws<ArgumentException>(() => argument.Flag('<'));
-            Assert.Throws<ArgumentException>(() => argument.Flag('.'));
-            Assert.Throws<ArgumentException>(() => argument.Flag('-'));
+            Assert.Throws<ArgumentException>(() => argument.Flag(flag));
         }
 
         [Fact]
@@ -274,6 +228,8 @@ namespace argparse.UnitTests
         [Fact]
         public void ArgumentEnumerableTypesNotSupportedExceptIEnumerable()
         {
+            Assert.NotNull(new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IEnumerable));
+
             Assert.Throws<ArgumentException>(() =>
                 new ArgumentParser().CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.ICollection));
             Assert.Throws<ArgumentException>(() =>

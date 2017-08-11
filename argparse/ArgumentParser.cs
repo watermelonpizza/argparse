@@ -15,6 +15,8 @@ namespace argparse
 
         public string[] Passthrough { get; private set; }
 
+        public bool DisableAutomaticHelpCommands { get; set; }
+
         private List<IArgumentCatagory> _argumentCatagories = new List<IArgumentCatagory>();
         private List<IParameterCatagory> _paramterCatagories = new List<IParameterCatagory>();
         private List<ICommandCatagory> _commandCatagories = new List<ICommandCatagory>();
@@ -79,12 +81,6 @@ namespace argparse
                     ?.CatagoryInstance;
         }
 
-        public void WriteHelp()
-        {
-            // TODO: Help writing logic here. 
-            // Probably need helper console class here for formatting
-        }
-
         public void Parse(params string[] args)
         {
             // Handled in dotnet
@@ -97,8 +93,48 @@ namespace argparse
             // First check for static help argument of -h, --help, /help etc.
             // And ensure anything before help argumnt is not a command. 
             // If it is call help on the command.
-            if (args.Any(arg => ArgumentHelper.HelpArguments.Contains(arg)))
+            string helpArg;
+            if ((helpArg = args.SingleOrDefault(arg => ArgumentHelper.HelpArguments.Contains(arg.ToLowerInvariant()))) != null)
             {
+                // Get the index of the help call to ensure that there isn't
+                // a command call before it
+                int index = args.ToList().IndexOf(helpArg);
+                IEnumerable<string> preArgs = args.Take(index);
+
+                ICommand command =
+                    _commandCatagories
+                        .SelectMany(cc => cc.Commands)
+                        .SingleOrDefault(c => preArgs.Contains(c.CommandName.ToLowerInvariant()));
+
+                if (command != null)
+                {
+                    IProperty property = command as IProperty;
+
+                    // Now set the sub argument parser to parse the rest of the arguments
+                    // Or if it is a bool type then set it to true and we are done
+                    if (property.Property.PropertyType == typeof(IArgumentParser))
+                    {
+                        ArgumentParser commandsArgumentParser = property.GetValue() as ArgumentParser;
+                        commandsArgumentParser.Parse(helpArg);
+
+                        return;
+                    }
+                    else if (property.Property.PropertyType == typeof(bool))
+                    {
+                        // TODO: Print help for just command if it is bool
+                    }
+                    else
+                    {
+                        // TODO: Throw exception, commands cannot be some other type than bool or IArgumentParser
+                    }
+                }
+                else
+                {
+                    var split = ArgumentHelper.StripArgument(helpArg);
+                    WriteHelp(split.prefix);
+                }
+
+
                 // TODO: Check for help postition and call on command if nessasary
 
                 return;
@@ -173,12 +209,12 @@ namespace argparse
 
                         // Now set the sub argument parser to parse the rest of the arguments
                         // Or if it is a bool type then set it to true and we are done
-                        if (property.Property.PropertyType == typeof(IArgumentParser))
+                        if (property.Property.PropertyType == typeof(ICommandArgumentParser))
                         {
-                            ArgumentParser commandParser = new ArgumentParser();
-                            property.SetValue(commandParser);
+                            CommandArgumentParser commandsArgumentParser = property.GetValue() as CommandArgumentParser;
+                            commandsArgumentParser.Selected = true;
+                            commandsArgumentParser.Parse(nextAllArgs);
 
-                            commandParser.Parse(nextAllArgs);
                             return;
                         }
                         else if (property.Property.PropertyType == typeof(bool))
@@ -267,6 +303,12 @@ namespace argparse
                     }
                 }
             }
+        }
+
+        internal void WriteHelp(string prefixUsed)
+        {
+            // TODO: Help writing logic here. 
+            // Probably need helper console class here for formatting
         }
 
         private (bool success, bool nextArgumentUsed) FindNameAndSetProperty((string prefix, string argument) arg, string nextArg)

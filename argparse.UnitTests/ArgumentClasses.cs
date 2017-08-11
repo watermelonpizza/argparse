@@ -43,19 +43,19 @@ namespace argparse.UnitTests
 
     public class NameOptions
     {
-        public int lowercaseproperty { get; set; }
-        public int UPPERCASEPROPERTY { get; set; }
-        public int PascalCaseProperty { get; set; }
-        public int camelCaseProperty { get; set; }
-        public int PropertyWithEndingTLA { get; set; }
-        public int PropertyWithTLAInIt { get; set; }
-        public int TLA { get; set; }
-        public int Property_With_Underscores { get; set; }
-        public int property_in_lowercase_with_underscores { get; set; }
-        public int PROPERTY_IN_UPPERCASE_WITH_UNDERSCORES { get; set; }
-        public int PropertyWithNumber1InIt { get; set; }
-        public int PropertyWithNumberEnding1 { get; set; }
-        public int PropertyWithTLA1Number { get; set; }
+        public bool lowercaseproperty { get; set; }
+        public bool UPPERCASEPROPERTY { get; set; }
+        public bool PascalCaseProperty { get; set; }
+        public bool camelCaseProperty { get; set; }
+        public bool PropertyWithEndingTLA { get; set; }
+        public bool PropertyWithTLAInIt { get; set; }
+        public bool TLA { get; set; }
+        public bool Property_With_Underscores { get; set; }
+        public bool property_in_lowercase_with_underscores { get; set; }
+        public bool PROPERTY_IN_UPPERCASE_WITH_UNDERSCORES { get; set; }
+        public bool PropertyWithNumber1InIt { get; set; }
+        public bool PropertyWithNumberEnding1 { get; set; }
+        public bool PropertyWithTLA1Number { get; set; }
 
     }
 #pragma warning restore IDE1006 // Naming Styles
@@ -102,6 +102,7 @@ namespace argparse.UnitTests
 
     public class MultiOptionsEnumerableType
     {
+        public IEnumerable<int> IEnumerable { get; set; }
         public ICollection<int> ICollection { get; set; }
         public IReadOnlyCollection<int> IReadOnlyCollection { get; set; }
         public IList<int> IList { get; set; }
@@ -112,16 +113,18 @@ namespace argparse.UnitTests
 
     public class PropertyTypes
     {
-        public int GetAndSet { get; set; }
-        public int GetOnly { get; }
-        public int SetOnly { set { } }
-        public int GetPrivateSet { get; private set; }
-        public int PrivateGetSet { private get; set; }
+        public bool GetAndSet { get; set; }
+        public bool GetOnly { get; }
+        public bool SetOnly { set { } }
+        public bool GetPrivateSet { get; private set; }
+        public bool PrivateGetSet { private get; set; }
     }
 
     public class Commands
     {
         public bool FlagCommand { get; set; }
-        public IArgumentParser CommandWithArguments { get; set; }
+        public bool SecondFlagCommand { get; set; }
+        public ICommandArgumentParser CommandWithArguments { get; set; }
+        public ICommandArgumentParser SecondCommandWithArguments { get; set; }
     }
 }
