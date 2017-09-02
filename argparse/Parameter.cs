@@ -36,11 +36,18 @@ namespace argparse
                     nameof(TArgument));
             }
 
+            if (property.GetMethod == null || property.SetMethod == null)
+            {
+                throw new ArgumentException(
+                    $"Property '{property.Name}' must have both a get and set accessor on catagory '{typeof(TArgumentOptions).Name}'.",
+                    nameof(property));
+            }
+
             _catagoryCreator = catagoryCreator;
             _currentCatagory = currentCatagory;
             Property = property;
 
-            Name(property.Name);
+            Name(property.Name.ToUpperInvariant());
 
             ParameterType = typeof(TArgument);
 
@@ -70,6 +77,11 @@ namespace argparse
 
         public IParameter<TArgumentOptions, TArgument> Name(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"{Property.Name} names cannot be empty or null.", nameof(name));
+            }
+
             ParameterName = name;
 
             return this;

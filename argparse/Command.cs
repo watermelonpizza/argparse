@@ -62,6 +62,11 @@ namespace argparse
 
         public ICommand<TOptions> Name(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"{Property.Name} names cannot be empty or null.", nameof(name));
+            }
+
             CommandName = ArgumentHelper.FormatCommandName(name);
 
             return this;

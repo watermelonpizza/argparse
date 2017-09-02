@@ -10,88 +10,88 @@ namespace argparse.UnitTests
         [Fact]
         public void CommandDefaultName_PascalCase()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PascalCaseProperty);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PascalCaseProperty);
             Assert.Equal("pascalcaseproperty", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_LowerCase()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.lowercaseproperty);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.lowercaseproperty);
             Assert.Equal("lowercaseproperty", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_UpperCase()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.UPPERCASEPROPERTY);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.UPPERCASEPROPERTY);
             Assert.Equal("uppercaseproperty", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_CamelCase()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.camelCaseProperty);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.camelCaseProperty);
             Assert.Equal("camelcaseproperty", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_EndingTLA()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithEndingTLA);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithEndingTLA);
             Assert.Equal("propertywithendingtla", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_TLAInIt()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithTLAInIt);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithTLAInIt);
             Assert.Equal("propertywithtlainit", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_OnlyTLA()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.TLA);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.TLA);
             Assert.Equal("tla", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_UnderscoresThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.Property_With_Underscores));
+            Assert.Throws<ArgumentException>(() => ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.Property_With_Underscores));
         }
 
         [Fact]
         public void CommandDefaultName_LowerCaseUnderscoresThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.property_in_lowercase_with_underscores));
+            Assert.Throws<ArgumentException>(() => ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.property_in_lowercase_with_underscores));
         }
 
         [Fact]
         public void CommandDefaultName_UppercaseUnderscoresThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PROPERTY_IN_UPPERCASE_WITH_UNDERSCORES));
+            Assert.Throws<ArgumentException>(() => ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PROPERTY_IN_UPPERCASE_WITH_UNDERSCORES));
         }
 
         [Fact]
         public void CommandDefaultName_NumberInIt()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithNumber1InIt);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithNumber1InIt);
             Assert.Equal("propertywithnumber1init", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_EndingNumber()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithNumberEnding1);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithNumberEnding1);
             Assert.Equal("propertywithnumberending1", command.CommandName);
         }
 
         [Fact]
         public void CommandDefaultName_Number()
         {
-            ICommand command = new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithTLA1Number);
+            ICommand command = ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PropertyWithTLA1Number);
             Assert.Equal("propertywithtla1number", command.CommandName);
         }
 
@@ -106,7 +106,7 @@ namespace argparse.UnitTests
         public void CommandNameMethodAllowedNames(string commandName)
         {
             ICommand<NameOptions> command =
-                new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PascalCaseProperty).Name(commandName);
+                ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PascalCaseProperty).Name(commandName);
 
             Assert.Equal(commandName, command.CommandName);
         }
@@ -122,10 +122,13 @@ namespace argparse.UnitTests
         [InlineData("-abc")]
         [InlineData("abc bbb")]
         [InlineData("-abc bbb")]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
         public void CommandNameMethodDissallowedNamesShouldThrowCommandException(string CommandName)
         {
             ICommand<NameOptions> command =
-                new ArgumentParser().CreateCommandCatagory<NameOptions>().WithCommand(x => x.PascalCaseProperty);
+                ArgumentParser.Create("app").CreateCommandCatagory<NameOptions>().WithCommand(x => x.PascalCaseProperty);
 
             Assert.Throws<ArgumentException>(() => command.Name(CommandName));
         }
@@ -134,7 +137,7 @@ namespace argparse.UnitTests
         public void CommandWithCommandReturnsANewCommand()
         {
             ICommand<Commands> command =
-                new ArgumentParser().CreateCommandCatagory<Commands>().WithCommand(x => x.FlagCommand);
+                ArgumentParser.Create("app").CreateCommandCatagory<Commands>().WithCommand(x => x.FlagCommand);
 
             Assert.NotSame(command, command.WithCommand(x => x.SecondFlagCommand));
         }
@@ -143,7 +146,7 @@ namespace argparse.UnitTests
         public void CommandGetCatagoryReturnsCatagory()
         {
             ICommand<BasicOptions> command =
-                new ArgumentParser().CreateCommandCatagory<BasicOptions>().WithCommand(x => x.Boolean);
+                ArgumentParser.Create("app").CreateCommandCatagory<BasicOptions>().WithCommand(x => x.Boolean);
 
             Assert.IsType<BasicOptions>(command.GetCommandCatagory<BasicOptions>());
         }
@@ -152,7 +155,7 @@ namespace argparse.UnitTests
         public void CommandGetCatagoryNotNull()
         {
             ICommand<BasicOptions> command =
-                new ArgumentParser().CreateCommandCatagory<BasicOptions>().WithCommand(x => x.Boolean);
+                ArgumentParser.Create("app").CreateCommandCatagory<BasicOptions>().WithCommand(x => x.Boolean);
 
             Assert.NotNull(command.GetCommandCatagory<BasicOptions>());
         }
@@ -160,7 +163,7 @@ namespace argparse.UnitTests
         [Fact]
         public void CommandPropertyWithGetAndSetAccessorsPasses()
         {
-            new ArgumentParser().CreateCommandCatagory<PropertyTypes>().WithCommand(x => x.GetAndSet);
+            ArgumentParser.Create("app").CreateCommandCatagory<PropertyTypes>().WithCommand(x => x.GetAndSet);
             
         }
 
@@ -168,7 +171,7 @@ namespace argparse.UnitTests
         public void CommandWithoutGetOrSetShouldThrowCommandException()
         {
             Assert.Throws<ArgumentException>(() =>
-                new ArgumentParser().CreateCommandCatagory<PropertyTypes>().WithCommand(x => x.GetOnly));
+                ArgumentParser.Create("app").CreateCommandCatagory<PropertyTypes>().WithCommand(x => x.GetOnly));
             // Build time error. Cannot test anyway
             //Assert.Throws<CommandException>(() =>
             //    parser.CreateCommandCatagory<PropertyTypes>().WithCommand(x => x.SetOnly));
@@ -177,7 +180,7 @@ namespace argparse.UnitTests
         [Fact]
         public void CommandArgumentsAreSparateFromBaseArgumentParser()
         {
-            ArgumentParser parser = new ArgumentParser();
+            ArgumentParser parser = ArgumentParser.Create("app");
             parser.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.String).Name("basename");
             parser.CreateCommandCatagory<Commands>().WithCommand(x => x.CommandWithArguments, (cp) => cp.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.String).Name("basename"));
 

@@ -51,6 +51,11 @@ namespace argparse
         {
             PropertyInfo property = (command.Body as MemberExpression).Member as PropertyInfo;
 
+            if (_commands.Any(a => a.Property == property))
+            {
+                throw new ArgumentException($"Command '{property.Name}' has already been added to the catagory '{typeof(TOptions).Name}' and cannot be set twice.");
+            }
+
             var cmd = new Command<TOptions>(_catagoryCreator, this, property);
             _commands.Add(cmd);
 

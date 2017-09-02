@@ -11,28 +11,28 @@ namespace argparse
 {
     internal class Argument<TOptions, TArgument> : IArgument<TOptions, TArgument>, IProperty
     {
-        private IArgumentCatagory<TOptions> _currentCatagory;
-        private ICreateArgumentCatagory _catagoryCreator;
+        protected IArgumentCatagory<TOptions> _currentCatagory;
+        protected ICreateArgumentCatagory _catagoryCreator;
 
         /// <summary>
         /// A single alphanumeric character used as a reprisentation for the argument. E.g. -h
         /// Does not require a prefix (i.e -, -- or / etc.).
         /// <c>\0</c> = no flag for this argument.
         /// </summary>
-        public char ArgumentFlag { get; private set; }
+        public char ArgumentFlag { get; private set; } = ArgumentHelper.NoFlag;
 
         /// <summary>
         /// The fully-named argument. E.g. --help
         /// Does not require a prefix (i.e -, -- or / etc.).
         /// </summary>
-        public string ArgumentName { get; private set; }
+        public string ArgumentName { get; private set; } = string.Empty;
 
         public Type ArgumentType { get; }
 
         /// <summary>
         /// The help documentation for the argument
         /// </summary>
-        public string ArgumentHelp { get; private set; }
+        public string ArgumentHelp { get; private set; } = string.Empty;
 
         /// <summary>
         /// Sets the arguments to be a counter for the number of times the argument is used.
@@ -47,6 +47,8 @@ namespace argparse
         /// </summary>
         public object ArgumentDefaultValue { get; private set; }
 
+        public bool ArgumentDefaultSet { get; private set; }
+
         /// <summary>
         /// Whether the argument is required to be specified or not.
         /// </summary>
@@ -57,20 +59,30 @@ namespace argparse
         /// The argument type <see cref="TArgument"/> must be <see cref="IEnumerable{T}"/>.
         /// This is set implicitlely based on the type. You cannot set this manually. 
         /// </summary>
-        public bool IsMultiple { get; }
+        public bool IsMultiple { get; protected set; }
+
+        public bool IsEnum { get; }
+
+        public bool IsFlags { get; }
 
         /// <summary>
         /// The property info of the argument
         /// </summary>
         public PropertyInfo Property { get; private set; }
 
+
         public Argument(ICreateArgumentCatagory catagoryCreator, IArgumentCatagory<TOptions> currentCatagory, PropertyInfo property)
         {
-            if (!ArgumentParser.SupportedTypes.Contains(typeof(TArgument)))
+            IsEnum = typeof(Enum).GetTypeInfo().IsAssignableFrom(typeof(TArgument).GetTypeInfo());
+
+            if (!IsEnum)
             {
-                throw new ArgumentException(
-                    $"{typeof(TArgument).Name} is not supported as an argument type for '{property.Name}' on catagory '{typeof(TOptions).Name}'. Please use only one of the supported types as found in {nameof(ArgumentParser.SupportedTypes)}",
-                    nameof(TArgument));
+                if (!ArgumentParser.SupportedTypes.Contains(typeof(TArgument)))
+                {
+                    throw new ArgumentException(
+                        $"{typeof(TArgument).Name} is not supported as an argument type for '{property.Name}' on catagory '{typeof(TOptions).Name}'. Please use only one of the supported types as found in {nameof(ArgumentParser.SupportedTypes)}",
+                        nameof(TArgument));
+                }
             }
 
             if (property.GetMethod == null || property.SetMethod == null)
@@ -83,6 +95,9 @@ namespace argparse
             _catagoryCreator = catagoryCreator;
             _currentCatagory = currentCatagory;
             Property = property;
+
+            if (typeof(TArgument).GetTypeInfo().GetCustomAttribute<FlagsAttribute>() != null)
+                IsFlags = true;
 
             ArgumentName = ArgumentHelper.DefaultArgumentToString(property.Name);
             ArgumentType = typeof(TArgument);
@@ -102,7 +117,7 @@ namespace argparse
             return Property.GetValue(instance.CatagoryInstance);
         }
 
-        public IArgument<TOptions, TArgument> Countable()
+        public virtual IArgument<TOptions, TArgument> Countable()
         {
             if (typeof(TArgument) != typeof(short) &&
                 typeof(TArgument) != typeof(int) &&
@@ -125,9 +140,17 @@ namespace argparse
             return _catagoryCreator.CreateArgumentCatagory<TOptions1>();
         }
 
-        public IArgument<TOptions, TArgument> DefaultValue(TArgument value)
+        public virtual IArgument<TOptions, TArgument> DefaultValue(TArgument value)
         {
+            if (value == null)
+            {
+                throw new ArgumentException(
+                    $"Default value cannot be null or the types default for property '{Property.Name}' on catagory '{typeof(TOptions).Name}'.",
+                    nameof(value));
+            }
+
             ArgumentDefaultValue = value;
+            ArgumentDefaultSet = true;
 
             return this;
         }
@@ -159,7 +182,7 @@ namespace argparse
 
         public IArgument<TOptions, TArgument> Name(string name)
         {
-            if (string.IsNullOrEmpty(name) || !Regex.IsMatch(name, ArgumentHelper.NameMatchPattern))
+            if (string.IsNullOrWhiteSpace(name) || !Regex.IsMatch(name, ArgumentHelper.NameMatchPattern))
             {
                 throw new ArgumentException(
                     $"{nameof(name)} must only be compromised of letters, numbers or hyphens, must be at least two characters and must start with a letter. Match pattern: { ArgumentHelper.NameMatchPattern }",

@@ -8,6 +8,8 @@ namespace argparse
     {
         IEnumerable<IParameter> Parameters { get; }
 
+        uint PositionStart { get; }
+
         string CatagoryName { get; }
     }
 

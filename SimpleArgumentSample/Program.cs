@@ -1,4 +1,5 @@
 ﻿using argparse;
+using argparse.Attributes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,28 +29,37 @@ namespace SimpleArgumentSample
         // Usage: app [OPTIONS] SCOPE [BasicArgumentParser]
         static void Main(string[] args)
         {
-            ArgumentParser
-                .Default
+            ArgumentParser parser = ArgumentParser.Create(
+                "simpleargumentsample",
+                "Simple Argument Sample Application");
+
+            parser
                 .CreateArgumentCatagory<GeneralOptions>()
                     .WithArgument(x => x.Flag)
                         .Required()
                         .Name("blah")
+                        .DefaultValue(false)
+                    .WithArgument(x => x.MyEnum)
+                        .Help("This is the enum test. Should put the possible values after this.")
+                        .DefaultValue(MyEnum.Option2)
                     .WithArgument(x => x.CountMe)
+                        .Help("This is a reallllllllly long help content box that will have to wrap around and stuff. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+                        .DefaultValue(10)
                 .CreateArgumentCatagory<NetworkOptions>()
                     .WithArgument(x => x.Integer)
                         .Name("intplx")
-                        .Flag('i');
+                        .Flag('i')
+                        .Help("Some help here is good for other things and stuff");
 
-            ArgumentParser
-                .Default
+            parser
                 .CreateParameterCatagory<PositionalOptions>()
                     .WithParameter(x => x.Source)
-                        .Name("string")
-                    .WithParameter(x => x.Destination)
+                        .Required()
+                    .WithMultiParameter(x => x.Destination)
+                        .Required()
                         .Name("dest");
 
-            ArgumentParser
-                .Default
+            parser
                 .CreateCommandCatagory<Commands>()
                     .Name("comANDS")
                     .WithCommand(x => x.Config, SetupConfigCommand)
@@ -57,24 +67,24 @@ namespace SimpleArgumentSample
                 .CreateCommandCatagory<SimpleCommands>()
                     .WithCommand(x => x.Config);
 
-            ArgumentParser.Default.Parse(args);
+            parser.Parse(args);
 
-            GeneralOptions go = ArgumentParser.Default.GetArgumentCatagory<GeneralOptions>();
-            NetworkOptions no = ArgumentParser.Default.GetArgumentCatagory<NetworkOptions>();
-            PositionalOptions po = ArgumentParser.Default.GetParameterCatagory<PositionalOptions>();
+            //GeneralOptions go = parser.GetArgumentCatagory<GeneralOptions>();
+            //NetworkOptions no = parser.GetArgumentCatagory<NetworkOptions>();
+            //PositionalOptions po = parser.GetParameterCatagory<PositionalOptions>();
 
-            Commands c = ArgumentParser.Default.GetCommandCatagory<Commands>();
-            SimpleCommands sc = ArgumentParser.Default.GetCommandCatagory<SimpleCommands>();
+            //Commands c = parser.GetCommandCatagory<Commands>();
+            //SimpleCommands sc = parser.GetCommandCatagory<SimpleCommands>();
 
-            ConfigCommands cc = c.Config.GetArgumentCatagory<ConfigCommands>();
+            //ConfigCommands cc = c.Config.GetArgumentCatagory<ConfigCommands>();
 
-            foreach (var item in args)
-            {
-                Console.WriteLine(item);
-            }
-            Console.WriteLine();
-            ArgumentParser.Default.CreateArgumentCatagory<GeneralOptions>().WithArgument(x => x.String);
-            ArgumentParser.Default.Parse(args);
+            //foreach (var item in args)
+            //{
+            //    Console.WriteLine(item);
+            //}
+            //Console.WriteLine();
+            //parser.CreateArgumentCatagory<GeneralOptions>().WithArgument(x => x.String);
+            //parser.Parse(args);
 
         }
 
@@ -93,7 +103,9 @@ namespace SimpleArgumentSample
 
         public NetworkOptions Network { get; set; }
         public DateTime DateTime { get; set; }
-        public TypeCode MyEnum { get; set; }
+        [Help("The help")]
+        [Name("my-enum")]
+        public MyEnum MyEnum { get; set; }
         public IEnumerable<string> List { get; set; }
         public string String { get; set; }
 
@@ -124,5 +136,15 @@ namespace SimpleArgumentSample
     {
         public string Source { get; set; }
         public IEnumerable<string> Destination { get; set; }
+    }
+    
+    [Flags]
+    enum MyEnum
+    {
+        [Help("This is option one")]
+        Option1,
+        [Help("This is the second option")]
+        Option2,
+        Option3
     }
 }

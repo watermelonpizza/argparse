@@ -19,7 +19,13 @@ namespace argparse
 
         bool IsMultiple { get; }
 
+        bool IsEnum { get; }
+
+        bool IsFlags { get; }
+
         object ArgumentDefaultValue { get; }
+
+        bool ArgumentDefaultSet { get; }
 
         string ArgumentHelp { get; }
 
