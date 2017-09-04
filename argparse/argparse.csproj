@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
+    <Authors>Daniel Miller</Authors>
+    <Description />
+    <Version>0.1.0</Version>
+    <PackageLicenseUrl>https://github.com/watermelonpizza/argparse/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/watermelonpizza/argparse</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/watermelonpizza/argparse</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

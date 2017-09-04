@@ -1,0 +1,9 @@
+version: 0.1.0+{build}
+
+image: Visual Studio 2017
+
+build_script:
+- ps: dotnet build
+
+test_script:
+- ps: dotnet test ./argparse.UnitTests/argparse.UnitTests.csproj
