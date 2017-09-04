@@ -279,17 +279,17 @@ namespace argparse.UnitTests.ArgumentParserTests
         //}
 
         [Theory]
-        [InlineData("--date-time", "9/10/2014", 2014, 10, 9)]
-        [InlineData("--date-time", "10 august 2015", 2015, 8, 10)]
-        [InlineData("--date-time", "1-10-2014 9pm", 2014, 10, 1, 21)]
-        [InlineData("--date-time", "2017-01-01 10:3:20PM", 2017, 1, 1, 22, 3, 20)]
-        [InlineData("-d", "9/10/2014", 2014, 10, 9)]
-        [InlineData("-d", "10 august 2015", 2015, 8, 10)]
-        [InlineData("-d", "1-10-2014 9pm", 2014, 10, 1, 21)]
-        [InlineData("-d", "2017-01-01 10:3:20PM", 2017, 1, 1, 22, 3, 20)]
-        public void ParserCanParseDateTimeStringType(string argument, string value, int year, int month, int day, int hour = 0, int minute = 0, int second = 0)
+        [InlineData("--date-time", "9/10/2014")]
+        [InlineData("--date-time", "10 august 2015")]
+        [InlineData("--date-time", "1-10-2014 9pm")]
+        [InlineData("--date-time", "2017-01-01 10:3:20PM")]
+        [InlineData("-d", "9/10/2014")]
+        [InlineData("-d", "10 august 2015")]
+        [InlineData("-d", "1-10-2014 9pm")]
+        [InlineData("-d", "2017-01-01 10:3:20PM")]
+        public void ParserCanParseDateTimeStringType(string argument, string value)
         {
-            DateTime expectedDateTime = new DateTime(year, month, day, hour, minute, second);
+            DateTime expectedDateTime = DateTime.Parse(value);
 
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
