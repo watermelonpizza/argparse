@@ -279,21 +279,37 @@ namespace argparse.UnitTests.ArgumentParserTests
         //}
 
         [Theory]
-        [InlineData("--date-time", "9/10/2014", 635484096000000000)]
-        [InlineData("--date-time", "10 august 2015", 635747616000000000)]
-        [InlineData("--date-time", "1-10-2014 9pm", 635477940000000000)]
-        [InlineData("--date-time", "2017-01-01 10:3:20PM", 636189050000000000)]
+        [InlineData("--date-time", "9/10/2014", 2014, 10, 9)]
+        [InlineData("--date-time", "10 august 2015", 2015, 8, 10)]
+        [InlineData("--date-time", "1-10-2014 9pm", 2014, 10, 1, 21)]
+        [InlineData("--date-time", "2017-01-01 10:3:20PM", 2017, 1, 1, 22, 3, 20)]
+        [InlineData("-d", "9/10/2014", 2014, 10, 9)]
+        [InlineData("-d", "10 august 2015", 2015, 8, 10)]
+        [InlineData("-d", "1-10-2014 9pm", 2014, 10, 1, 21)]
+        [InlineData("-d", "2017-01-01 10:3:20PM", 2017, 1, 1, 22, 3, 20)]
+        public void ParserCanParseDateTimeStringType(string argument, string value, int year, int month, int day, int hour = 0, int minute = 0, int second = 0)
+        {
+            DateTime expectedDateTime = new DateTime(year, month, day, hour, minute, second);
+
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                .WithArgument(x => x.DateTime)
+                    .Flag('d');
+
+            parser.Parse(argument, value);
+
+            Assert.Equal(expectedDateTime, parser.GetArgumentCatagory<BasicOptions>().DateTime);
+        }
+
+        [Theory]
         [InlineData("--date-time", "0", 0)]
         [InlineData("--date-time", "618199776000000000", 618199776000000000)]
         [InlineData("--date-time", "3155378975999999999", 3155378975999999999)]
-        [InlineData("-d", "9/10/2014", 635484096000000000)]
-        [InlineData("-d", "10 august 2015", 635747616000000000)]
-        [InlineData("-d", "1-10-2014 9pm", 635477940000000000)]
-        [InlineData("-d", "2017-01-01 10:3:20PM", 636189050000000000)]
         [InlineData("-d", "0", 0)]
         [InlineData("-d", "618199776000000000", 618199776000000000)]
         [InlineData("-d", "3155378975999999999", 3155378975999999999)]
-        public void ParserCanParseDateTimeType(string argument, string value, long ticks)
+        public void ParserCanParseDateTimeTicksType(string argument, string value, long ticks)
         {
             DateTime expectedDateTime = new DateTime(ticks);
 
