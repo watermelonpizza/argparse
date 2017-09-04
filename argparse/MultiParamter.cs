@@ -8,44 +8,12 @@ using System.Text;
 
 namespace argparse
 {
-    internal class MultiParamter<TArgumentOptions, TArgument> : IParameter<TArgumentOptions, TArgument>, IMultiProperty
+    internal class MultiParamter<TArgumentOptions, TArgument> : Parameter<TArgumentOptions, TArgument>, IMultiProperty
     {
-        private IParameterCatagory<TArgumentOptions> _currentCatagory;
-        private ICreateParameterCatagory _catagoryCreator;
-
-        public string ParameterName { get; private set; }
-
-        public Type ParameterType { get; }
-
-        public uint Position { get; }
-
-        public bool IsRequired { get; private set; }
-
-        public bool IsMultiple { get; }
-
-        public string ParamterHelp { get; private set; }
-
-        public PropertyInfo Property { get; }
-
         public MultiParamter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property, uint position)
+            : base(catagoryCreator, currentCatagory, property, position)
         {
-            if (!ArgumentParser.SupportedTypes.Contains(typeof(TArgument)))
-            {
-                throw new ArgumentException(
-                    $"{typeof(TArgument).Name} is not supported as a parameter type for {property.Name}. Please use only one of the supported types as found in {nameof(ArgumentParser.SupportedTypes)}",
-                    nameof(TArgument));
-            }
-
-            _catagoryCreator = catagoryCreator;
-            _currentCatagory = currentCatagory;
-            Property = property;
-
-            Name(property.Name);
-            
-            ParameterType = typeof(TArgument);
             IsMultiple = true;
-
-            Position = position;
         }
 
         public void AddValue(object obj)
@@ -58,25 +26,33 @@ namespace argparse
                 {
                     ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
 
-                    // If the property is enumerable and it's not null cast to a list, add the new value and set it back
-                    if (Property.GetValue(instance.CatagoryInstance) is IEnumerable<TArgument> propValue)
+                    // If the property is enumerable and if it's not null cast to a list, add the new value and set it back
+                    if (Property.GetValue(instance.CatagoryInstance) != null)
                     {
-                        if (propValue != null)
+                        if (Property.GetValue(instance.CatagoryInstance) is IEnumerable<TArgument> propValue)
                         {
                             IList<TArgument> propListValue = propValue.ToList();
                             propListValue.Add((TArgument)obj);
                             Property.SetValue(instance.CatagoryInstance, propListValue);
+
+                            ValueSet = true;
                         }
-                        // Otherwise create a new list and set the property
                         else
                         {
-                            Property.SetValue(
-                                instance.CatagoryInstance,
-                                new List<TArgument>
-                                {
-                                     (TArgument)obj
-                                });
+                            // TODO: Can't be not IEnumerable<TArgument> (can't get here?)
                         }
+                    }
+                    // Otherwise create a new list and set the property
+                    else
+                    {
+                        Property.SetValue(
+                            instance.CatagoryInstance,
+                            new List<TArgument>
+                            {
+                                (TArgument)obj
+                            });
+
+                        ValueSet = true;
                     }
                 }
                 catch (Exception)
@@ -89,63 +65,6 @@ namespace argparse
             {
                 // TODO: Throw exception why cannot add to non multiple
             }
-        }
-
-        public void SetValue(object obj)
-        {
-            if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
-
-            ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
-            Property.SetValue(instance.CatagoryInstance, obj);
-        }
-
-        public object GetValue()
-        {
-            ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
-            return Property.GetValue(instance.CatagoryInstance);
-        }
-
-        public IParameter<TArgumentOptions, TArgument> Help(string help)
-        {
-            ParamterHelp = help;
-
-            return this;
-        }
-
-        public IParameter<TArgumentOptions, TArgument> Name(string name)
-        {
-            ParameterName = name;
-
-            return this;
-        }
-
-        public IParameter<TArgumentOptions, TArgument> Required()
-        {
-            IsRequired = true;
-
-            return this;
-        }
-
-        public IParameter<TArgumentOptions, TArgument1> WithParameter<TArgument1>(Expression<Func<TArgumentOptions, TArgument1>> argument)
-        {
-            return _currentCatagory.WithParameter(argument);
-        }
-
-        public IParameter<TArgumentOptions, TArgument1> WithMultiParameter<TArgument1>(Expression<Func<TArgumentOptions, IEnumerable<TArgument1>>> argument)
-        {
-            return _currentCatagory.WithMultiParameter(argument);
-        }
-
-        public IParameterCatagory<TOptions> CreateParameterCatagory<TOptions>()
-            where TOptions : class, new()
-        {
-            return _catagoryCreator.CreateParameterCatagory<TOptions>();
-        }
-
-        public TOptions GetParameterCatagory<TOptions>()
-            where TOptions : class, new()
-        {
-            return _catagoryCreator.GetParameterCatagory<TOptions>();
         }
     }
 }

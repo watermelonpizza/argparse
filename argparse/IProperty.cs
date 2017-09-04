@@ -9,6 +9,8 @@ namespace argparse
     {
         PropertyInfo Property { get; }
 
+        bool ValueSet { get; }
+
         void SetValue(object obj);
 
         object GetValue();

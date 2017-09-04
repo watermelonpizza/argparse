@@ -5,7 +5,7 @@ using System.Text;
 
 namespace argparse
 {
-    public interface IParameter
+    public interface IParameter : IComparable<IParameter>
     {
         string ParameterName { get; }
 

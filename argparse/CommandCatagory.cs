@@ -10,7 +10,7 @@ namespace argparse
     internal class CommandCatagory<TOptions> : ICommandCatagory<TOptions>, ICatagoryInstance
         where TOptions : class, new()
     {
-        private ICreateCommandCatagory _catagoryCreator;
+        private ArgumentParser _parentArgumentParser;
         private List<ICommand> _commands = new List<ICommand>();
 
         public IEnumerable<ICommand> Commands => _commands;
@@ -19,9 +19,9 @@ namespace argparse
 
         public object CatagoryInstance { get; } = new TOptions();
 
-        public CommandCatagory(ICreateCommandCatagory catagoryCreator, string name)
+        public CommandCatagory(ArgumentParser parentArgumentParser, string name)
         {
-            _catagoryCreator = catagoryCreator;
+            _parentArgumentParser = parentArgumentParser;
             CatagoryName = ArgumentHelper.FormatModuleName(name);
         }
 
@@ -41,7 +41,7 @@ namespace argparse
                 throw new ArgumentException($"Command '{property.Name}' has already been added to the catagory '{typeof(TOptions).Name}' and cannot be set twice.");
             }
 
-            var cmd = new Command<TOptions>(_catagoryCreator, this, property);
+            var cmd = new Command<TOptions>(_parentArgumentParser, this, property);
             _commands.Add(cmd);
 
             return cmd;
@@ -56,10 +56,10 @@ namespace argparse
                 throw new ArgumentException($"Command '{property.Name}' has already been added to the catagory '{typeof(TOptions).Name}' and cannot be set twice.");
             }
 
-            var cmd = new Command<TOptions>(_catagoryCreator, this, property);
+            var cmd = new Command<TOptions>(_parentArgumentParser, this, property);
             _commands.Add(cmd);
-
-            ICommandArgumentParser commandArgParser = new CommandArgumentParser();
+            
+            ICommandArgumentParser commandArgParser = new CommandArgumentParser(_parentArgumentParser, cmd);
             parser(commandArgParser);
 
             property.SetValue(CatagoryInstance, commandArgParser);

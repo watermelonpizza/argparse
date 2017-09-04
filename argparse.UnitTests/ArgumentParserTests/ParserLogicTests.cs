@@ -221,14 +221,12 @@ namespace argparse.UnitTests.ArgumentParserTests
         [InlineData("--character", "&", '&')]
         [InlineData("--character", ";", ';')]
         [InlineData("--character", "~", '~')]
-        [InlineData("--character", "\x0058", '\x0058')]
         [InlineData("--character", "\u0058", '\u0058')]
         [InlineData("-c", "a", 'a')]
         [InlineData("-c", "1", '1')]
         [InlineData("-c", "&", '&')]
         [InlineData("-c", ";", ';')]
         [InlineData("-c", "~", '~')]
-        [InlineData("-c", "\x0058", '\x0058')]
         [InlineData("-c", "\u0058", '\u0058')]
         public void ParserCanParseCharacterType(string argument, string character, char expectedValue)
         {

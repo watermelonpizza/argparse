@@ -49,6 +49,8 @@ namespace argparse
                             IList<TArgument> propListValue = propValue.ToList();
                             propListValue.Add((TArgument)obj);
                             Property.SetValue(instance.CatagoryInstance, propListValue);
+
+                            ValueSet = true;
                         }
                         else
                         {
@@ -64,6 +66,8 @@ namespace argparse
                             {
                                 (TArgument)obj
                             });
+
+                        ValueSet = true;
                     }
                 }
                 catch (Exception)

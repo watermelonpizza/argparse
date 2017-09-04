@@ -12,11 +12,15 @@ namespace argparse
         private ICommandCatagory<TOptions> _currentCatagory;
         private ICreateCommandCatagory _catagoryCreator;
 
-        public string CommandName { get; set; }
+        public string CommandName { get; set; } = string.Empty;
 
-        public string CommandHelp { get; set; }
+        public string CommandHelp { get; set; } = string.Empty;
+
+        public string CommandSummary { get; set; } = string.Empty;
 
         public PropertyInfo Property { get; }
+
+        public bool ValueSet { get; private set; }
 
         public Command(ICreateCommandCatagory catagoryCreator, ICommandCatagory<TOptions> currentCatagory, PropertyInfo property)
         {
@@ -45,6 +49,8 @@ namespace argparse
 
             ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
             Property.SetValue(instance.CatagoryInstance, obj);
+
+            ValueSet = true;
         }
 
         public object GetValue()
@@ -56,6 +62,13 @@ namespace argparse
         public ICommand<TOptions> Help(string help)
         {
             CommandHelp = help;
+
+            return this;
+        }
+
+        public ICommand<TOptions> Summary(string summary)
+        {
+            CommandSummary = summary;
 
             return this;
         }

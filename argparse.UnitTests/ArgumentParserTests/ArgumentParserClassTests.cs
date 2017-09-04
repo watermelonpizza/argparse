@@ -11,175 +11,175 @@ namespace argparse.UnitTests.ArgumentParserTests
         [Fact]
         public void ArgumentParserSupportsType_bool()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(bool)));
+            Assert.Contains(typeof(bool), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_byte()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(byte)));
+            Assert.Contains(typeof(byte), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_sbyte()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(sbyte)));
+            Assert.Contains(typeof(sbyte), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_short()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(short)));
+            Assert.Contains(typeof(short), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_int()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(int)));
+            Assert.Contains(typeof(int), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_uint()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(uint)));
+            Assert.Contains(typeof(uint), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_long()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(long)));
+            Assert.Contains(typeof(long), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_ulong()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(ulong)));
+            Assert.Contains(typeof(ulong), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_float()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(float)));
+            Assert.Contains(typeof(float), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_double()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(double)));
+            Assert.Contains(typeof(double), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_decimal()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(decimal)));
+            Assert.Contains(typeof(decimal), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_char()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(char)));
+            Assert.Contains(typeof(char), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_string()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(string)));
+            Assert.Contains(typeof(string), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_DateTime()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(DateTime)));
+            Assert.Contains(typeof(DateTime), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_Enum()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(Enum)));
+            Assert.Contains(typeof(Enum), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_byte()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<byte>)));
+            Assert.Contains(typeof(IEnumerable<byte>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_sbyte()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<sbyte>)));
+            Assert.Contains(typeof(IEnumerable<sbyte>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_short()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<short>)));
+            Assert.Contains(typeof(IEnumerable<short>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_int()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<int>)));
+            Assert.Contains(typeof(IEnumerable<int>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_uint()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<uint>)));
+            Assert.Contains(typeof(IEnumerable<uint>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_long()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<long>)));
+            Assert.Contains(typeof(IEnumerable<long>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_ulong()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<ulong>)));
+            Assert.Contains(typeof(IEnumerable<ulong>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_float()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<float>)));
+            Assert.Contains(typeof(IEnumerable<float>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_double()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<double>)));
+            Assert.Contains(typeof(IEnumerable<double>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_decimal()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<decimal>)));
+            Assert.Contains(typeof(IEnumerable<decimal>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_char()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<char>)));
+            Assert.Contains(typeof(IEnumerable<char>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_string()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<string>)));
+            Assert.Contains(typeof(IEnumerable<string>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_DateTime()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<DateTime>)));
+            Assert.Contains(typeof(IEnumerable<DateTime>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
         public void ArgumentParserSupportsType_IEnumerable_Enum()
         {
-            Assert.True(ArgumentParser.SupportedTypes.Contains(typeof(IEnumerable<Enum>)));
+            Assert.Contains(typeof(IEnumerable<Enum>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]

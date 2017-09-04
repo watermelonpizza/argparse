@@ -49,6 +49,8 @@ namespace argparse
 
         public bool ArgumentDefaultSet { get; private set; }
 
+        public bool ValueSet { get; protected set; }
+
         /// <summary>
         /// Whether the argument is required to be specified or not.
         /// </summary>
@@ -69,7 +71,6 @@ namespace argparse
         /// The property info of the argument
         /// </summary>
         public PropertyInfo Property { get; private set; }
-
 
         public Argument(ICreateArgumentCatagory catagoryCreator, IArgumentCatagory<TOptions> currentCatagory, PropertyInfo property)
         {
@@ -109,6 +110,8 @@ namespace argparse
 
             ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
             Property.SetValue(instance.CatagoryInstance, obj);
+
+            ValueSet = true;
         }
 
         public object GetValue()

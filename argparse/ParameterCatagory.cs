@@ -8,8 +8,8 @@ using System.Text;
 
 namespace argparse
 {
-    internal class ParameterCatagory<TArgumentOptions> : IParameterCatagory<TArgumentOptions>
-        where TArgumentOptions : new()
+    internal class ParameterCatagory<TArgumentOptions> : IParameterCatagory<TArgumentOptions>, ICatagoryInstance
+        where TArgumentOptions : class, new()
     {
         private ICreateParameterCatagory _catagoryCreator;
         private List<IParameter> _parameters = new List<IParameter>();

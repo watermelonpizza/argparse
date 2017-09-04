@@ -10,10 +10,10 @@ namespace argparse
 {
     internal class Parameter<TArgumentOptions, TArgument> : IParameter<TArgumentOptions, TArgument>, IProperty
     {
-        private IParameterCatagory<TArgumentOptions> _currentCatagory;
-        private ICreateParameterCatagory _catagoryCreator;
+        protected IParameterCatagory<TArgumentOptions> _currentCatagory;
+        protected ICreateParameterCatagory _catagoryCreator;
 
-        public string ParameterName { get; private set; }
+        public string ParameterName { get; private set; } = string.Empty;
 
         public Type ParameterType { get; }
 
@@ -21,11 +21,13 @@ namespace argparse
 
         public bool IsRequired { get; private set; }
 
-        public bool IsMultiple { get; }
+        public bool IsMultiple { get; protected set; }
 
-        public string ParamterHelp { get; private set; }
+        public string ParamterHelp { get; private set; } = string.Empty;
 
         public PropertyInfo Property { get; }
+
+        public bool ValueSet { get; protected set; }
 
         public Parameter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property, uint position)
         {
@@ -60,6 +62,8 @@ namespace argparse
 
             ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
             Property.SetValue(instance.CatagoryInstance, obj);
+
+            ValueSet = true;
         }
 
         public object GetValue()
@@ -114,6 +118,13 @@ namespace argparse
             where TOptions : class, new()
         {
             return _catagoryCreator.GetParameterCatagory<TOptions>();
+        }
+
+        public int CompareTo(IParameter other)
+        {
+            if (other == null) return 1;
+
+            return Position.CompareTo(other.Position);
         }
     }
 }

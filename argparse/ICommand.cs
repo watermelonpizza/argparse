@@ -11,6 +11,8 @@ namespace argparse
 
         string CommandHelp { get; }
 
+        string CommandSummary { get; }
+
         PropertyInfo Property { get; }
     }
 
@@ -20,5 +22,7 @@ namespace argparse
         ICommand<TOptions> Name(string name);
 
         ICommand<TOptions> Help(string help);
+
+        ICommand<TOptions> Summary(string summary);
     }
 }

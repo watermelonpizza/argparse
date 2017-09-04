@@ -14,5 +14,12 @@ namespace argparse
                 func(obj);
             }
         }
+
+        public static int MaxOrDefault<T>(this IEnumerable<T> collection, Func<T, int> func)
+        {
+            if (!collection.Any()) return 0;
+
+            return collection.Max(func);
+        }
     }
 }
