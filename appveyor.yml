@@ -9,4 +9,4 @@ test_script:
 - ps: >-
     cd ./argparse.UnitTests/
 
-    dotnet opencover -register:user -target:xunit.console -targetargs:"argparse.UnitTests.csproj /appveyor" -filter:"+[*]* -[xunit*]*" -output:coveragereport.xml
+    dotnet opencover -register:user -target:xunit.console.exe -targetargs:"argparse.UnitTests.csproj /appveyor" -filter:"+[*]* -[xunit*]*" -output:coveragereport.xml
