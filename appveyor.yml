@@ -6,4 +6,6 @@ build_script:
 - ps: dotnet build
 
 test_script:
-- ps: dotnet test ./argparse.UnitTests/argparse.UnitTests.csproj
+- ps: >-
+    cd ./argparse.UnitTests/
+    dotnet opencover -register:user -target:xunit.console -targetargs:"argparse.UnitTests.csproj /appveyor" -filter:"+[*]* -[xunit*]*" -output:coveragereport.xml
