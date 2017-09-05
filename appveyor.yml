@@ -1,12 +1,19 @@
-version: 0.1.0+{build}
-
+version: 1.0.0+{build}
 image: Visual Studio 2017
 
+install:
+- ps: choco install codecov
+
 build_script:
-- ps: dotnet build
+- ps: >-
+    dotnet restore
+
+    dotnet build
 
 test_script:
 - ps: >-
     cd ./argparse.UnitTests/
 
-    dotnet opencover -register:user -target:xunit.console.clr4.exe -targetargs:"argparse.UnitTests.csproj /appveyor" -filter:"+[*]* -[xunit*]*" -output:coveragereport.xml
+    dotnet opencover -register:user -target:dotnet.exe -targetargs:"test argparse.UnitTests.csproj" -filter:"+[*]* -[xunit*]*" -output:coveragereport.xml
+
+    codecov -f coveragereport.xml
