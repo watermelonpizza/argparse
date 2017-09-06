@@ -1,19 +1,27 @@
-version: 1.0.0+{build}
+version: 1.0.0-build{build}
 image: Visual Studio 2017
 
+environment:
+  COVERALLS_REPO_TOKEN:
+    secure: ySyXdl0xl8LAMcrN96+Z9dA6Tf6OIkK1N4dN4djHPsFDbLK/+5lhtEmrigyWJ8qd
+
 install:
-- ps: choco install codecov
+- ps: >-
+    Invoke-WebRequest https://ci.appveyor.com/api/buildjobs/9mlncjb38e1ijtf8/artifacts/main%2Fbin%2Fzip%2Fopencover.4.6.783.zip -outfile opencover-rc.zip
+
+    & "C:\Program Files\7-Zip\7z.exe" -oopencover x .\opencover-rc.zip
+    
+    rm .\opencover-rc.zip
+
+before_build:
+- mkdir artifacts
+- dotnet restore
 
 build_script:
-- ps: >-
-    dotnet restore
-
-    dotnet build
+- dotnet build
 
 test_script:
-- ps: >-
-    cd ./argparse.UnitTests/
+- ps: .\opencover\OpenCover.Console.exe -register:user -target:dotnet.exe -targetargs:"test argparse.UnitTests/argparse.UnitTests.csproj" -filter:"+[*]* -[xunit*]*" -output:"artifacts/coveragereport.xml"
 
-    dotnet opencover -register:user -target:dotnet.exe -targetargs:"test argparse.UnitTests.csproj" -filter:"+[*]* -[xunit*]*" -output:coveragereport.xml
-
-    codecov -f coveragereport.xml
+after_test:
+- ps: & $env:USERPROFILE/.nuget/packages/coveralls.io/1.3.4/tools/coveralls.net.exe --opencover artifacts/coveragereport.xml -r $env:COVERALLS_REPO_TOKEN
