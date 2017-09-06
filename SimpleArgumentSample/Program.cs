@@ -1,8 +1,10 @@
 ﻿using argparse;
 using argparse.Attributes;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace SimpleArgumentSample
@@ -45,6 +47,7 @@ namespace SimpleArgumentSample
                     .WithArgument(x => x.CountMe)
                         .Help("This is a reallllllllly long help content box that will have to wrap around and stuff. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
                         .DefaultValue(10)
+                        .Countable()
                 .CreateArgumentCatagory<NetworkOptions>()
                     .WithArgument(x => x.Integer)
                         .Name("intplx")
@@ -55,23 +58,41 @@ namespace SimpleArgumentSample
                 .CreateParameterCatagory<PositionalOptions>()
                     .WithParameter(x => x.Source)
                         .Required()
+                        .Name("longassparametername")
                     .WithMultiParameter(x => x.Destination)
                         .Required()
-                        .Name("dest");
+                        .Name("dest")
+                        .Help("Paramters can have help too!");
 
             parser
                 .CreateCommandCatagory<Commands>()
-                    .Name("comANDS")
                     .WithCommand(x => x.Config, SetupConfigCommand)
                         .Help("THis is config")
                 .CreateCommandCatagory<SimpleCommands>()
-                    .WithCommand(x => x.Config);
+                    .WithCommand(x => x.Config)
+                        .Name("Thisisalongcommandnamehere")
+                        .Help("Some help on this command");
 
             parser.Parse(args);
 
-            //GeneralOptions go = parser.GetArgumentCatagory<GeneralOptions>();
-            //NetworkOptions no = parser.GetArgumentCatagory<NetworkOptions>();
-            //PositionalOptions po = parser.GetParameterCatagory<PositionalOptions>();
+            if (parser.HelpCalled) return;
+
+            GeneralOptions go = parser.GetArgumentCatagory<GeneralOptions>();
+            NetworkOptions no = parser.GetArgumentCatagory<NetworkOptions>();
+            PositionalOptions po = parser.GetParameterCatagory<PositionalOptions>();
+            
+
+            Console.WriteLine("general options");
+            Console.WriteLine(JsonConvert.SerializeObject(go));
+
+
+            Console.WriteLine("network options");
+            Console.WriteLine(JsonConvert.SerializeObject(no));
+
+            Console.WriteLine("positional options");
+            Console.WriteLine(JsonConvert.SerializeObject(po));
+
+            Console.WriteLine(parser.Passthrough);
 
             //Commands c = parser.GetCommandCatagory<Commands>();
             //SimpleCommands sc = parser.GetCommandCatagory<SimpleCommands>();
@@ -93,7 +114,8 @@ namespace SimpleArgumentSample
             argParser
                 .CreateArgumentCatagory<ConfigCommands>()
                     .Name("Options")
-                    .WithArgument(x => x.Basic);
+                    .WithArgument(x => x.Basic)
+                        .Help("THis is sub help for this command");
         }
     }
 
@@ -106,7 +128,7 @@ namespace SimpleArgumentSample
         [Help("The help")]
         [Name("my-enum")]
         public MyEnum MyEnum { get; set; }
-        public IEnumerable<string> List { get; set; }
+        public ImmutableArray<string> List { get; set; }
         public string String { get; set; }
 
         public uint CountMe { get; set; }
@@ -135,7 +157,7 @@ namespace SimpleArgumentSample
     class PositionalOptions
     {
         public string Source { get; set; }
-        public IEnumerable<string> Destination { get; set; }
+        public ImmutableArray<string> Destination { get; set; }
     }
     
     [Flags]
