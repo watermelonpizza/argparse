@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -7,7 +8,7 @@ namespace argparse
 {
     public interface IArgumentCatagory
     {
-        IEnumerable<IArgument> Arguments { get; }
+        ImmutableArray<IArgument> Arguments { get; }
 
         string CatagoryName { get; }
     }

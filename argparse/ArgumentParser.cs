@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
@@ -19,7 +20,7 @@ namespace argparse
 
         public bool HelpCalled { get; private set; }
 
-        public string Preable { get; }
+        public string Preamble { get; }
 
         public string ApplicationName { get; }
 
@@ -36,13 +37,13 @@ namespace argparse
 
         protected ArgumentParser(string applicationName, string preamble, string applicationDescription)
         {
-            Preable = preamble;
+            Preamble = preamble;
             ApplicationName = applicationName;
             ApplicationDescription = applicationDescription;
         }
 
         protected ArgumentParser(ArgumentParser parentArgumentParser, ICommand commandScope)
-            : this(parentArgumentParser.ApplicationName, parentArgumentParser.Preable, parentArgumentParser.ApplicationDescription)
+            : this(parentArgumentParser.ApplicationName, parentArgumentParser.Preamble, parentArgumentParser.ApplicationDescription)
         {
             _parentArgumentParser = parentArgumentParser;
             _commandScope = commandScope;
@@ -430,25 +431,30 @@ namespace argparse
         {
             StringBuilder sb = new StringBuilder();
 
-            if (!string.IsNullOrWhiteSpace(Preable))
+            // Write out the preable (copyright or such details)
+            if (!string.IsNullOrWhiteSpace(Preamble))
             {
-                sb.Append(Preable);
+                sb.Append(Preamble);
                 sb.AppendLine();
                 sb.AppendLine();
             }
             
+            // Write out the usage of the application
             sb.Append($"Usage: {ApplicationName}");
 
+            // If the main argument parser has arguements ensure to include the options part before the command
             if (_parentArgumentParser != null &&
                 _parentArgumentParser._argumentCatagories.Any())
                 sb.Append(" [OPTIONS]");
 
+            // or in the case of this being within a command, write out the usage for the command
             if (_commandScope != null)
                 sb.Append($" {_commandScope.CommandName}");
 
             if (_argumentCatagories.Any())
                 sb.Append(" [OPTIONS]");
 
+            // Loop over all the paramters and print them out in order
             foreach (var parameter in _paramterCatagories.SelectMany(pc => pc.Parameters).OrderBy(p => p.Position))
             {
                 sb.Append(" ");
@@ -472,23 +478,38 @@ namespace argparse
 
             sb.AppendLine();
 
-            if (!string.IsNullOrWhiteSpace(_commandScope?.CommandSummary))
+            // If we are within a command print out its description
+            if (!string.IsNullOrWhiteSpace(_commandScope?.CommandDescription))
             {
-                sb.AppendLine(_commandScope.CommandSummary);
+                sb.AppendLine(_commandScope.CommandDescription);
             }
+            // Otherwise print out the applications description
             else if (!string.IsNullOrWhiteSpace(ApplicationDescription))
             {
                 sb.AppendLine(ApplicationDescription);
             }
 
+            // If we are in compact mode (i.e. no argument called, just the application was called without any args)
             if (displayMode == HelpDisplayMode.Compact)
             {
                 sb.AppendLine();
 
                 sb.AppendLine($"Run '{ApplicationName} --help' to see a list of all options and more information.");
             }
+            // Otherwise prepair to print off all the help documentation
             else
             {
+                // Next few lines determine what the longest possible length for all
+                // of the commands/argument/paramters to align the help correctly
+                // e.g.
+                // Options:
+                //   --arg1             |
+                //   --arg10            |
+                //                      |
+                // Paramters:           |
+                //   somelongparameter  |<- Help starts on that column 2 off the longest.
+                //
+
                 int argumentStartLength = _argumentCatagories.Count == 1 ? 2 : 4;
                 int commandStartLength = _commandCatagories.Count == 1 ? 2 : 4;
                 int paramterStartLength = _paramterCatagories.Count == 1 ? 2 : 4;
@@ -514,10 +535,14 @@ namespace argparse
 
                 helpIndentLength += 2;
 
+                // For when the help wraps over multiple lines, prepend this blank string
                 string helpPreSpacing = string.Join("", Enumerable.Repeat(" ", helpIndentLength));
 
+                // However the available width will bottom out at 20 charaters
+                // If the console is too small, it will just text wrap. Can't do anything about it.
                 int availableWidth = Math.Max(20, Console.WindowWidth - helpIndentLength);
 
+                // If there any any arguments loop over them all and print out the doco.
                 if (_argumentCatagories.Any())
                 {
                     string argumentPreSpacing = string.Join("", Enumerable.Repeat(" ", argumentStartLength));
@@ -588,8 +613,12 @@ namespace argparse
                                 sb.AppendLine(helpText);
                             }
 
+                            // If the display is in full mode write out the enum values as a list
+                            // with their help text if they have any
                             if (argument.IsEnum && displayMode == HelpDisplayMode.Full)
                             {
+                                // Has to filter out value__ because GetRuntimeFields() also includes the internal
+                                // enum value field. Better methods don't exist at netstandard1.3
                                 foreach (var enumValue in argument.ArgumentType.GetRuntimeFields().Where(f => f.Name != "value__"))
                                 {
                                     sb.Append((enumPreSpacing + enumValue.Name.ToLowerInvariant()).PadRight(helpIndentLength));
@@ -627,6 +656,7 @@ namespace argparse
                     }
                 }
 
+                // If there are any commands, loop over em' and print like above
                 if (_commandCatagories.Any())
                 {
                     string commandPreSpacing = string.Join("", Enumerable.Repeat(" ", commandStartLength));
@@ -678,6 +708,7 @@ namespace argparse
                     }
                 }
 
+                // Finally any paramters will be printed if there are any
                 if (_paramterCatagories.Any())
                 {
                     string paramterPreSpacing = string.Join("", Enumerable.Repeat(" ", paramterStartLength));
@@ -731,8 +762,6 @@ namespace argparse
             }
 
             Console.Write(sb.ToString());
-            // TODO: Help writing logic here. 
-            // Probably need helper console class here for formatting
         }
 
         private (string flagPrefixUsed, string namePrefixUsed) GetPrefixUsed(string prefix)
@@ -820,7 +849,6 @@ namespace argparse
 
         private (bool success, bool nextArgumentUsed) FindNameAndSetProperty((string prefix, string argument) arg, string nextArg)
         {
-            // TODO: Parse Enum values sparately, check if name matches any enum case insensitive
             // TODO: Support Enum Flags attribute (inherintly multi). Throw exception on IEnumerable<Enum> which is flags. Can't have multiple multiple options.
             // TODO: Parse multi values as comma seperated lists like: --files file1.txt,file2.txt,"file 3.txt"
             // TODO: Parse DateTime values as possible ticks
@@ -911,6 +939,7 @@ namespace argparse
                     {
                         // TODO: Throw exception, cannot have argument on countable
                     }
+
                     // If it's multiple we need to get the instance of the enumerable, cast the to type
                     // and add to that enumerable
                     else if (argument.IsMultiple)
@@ -1167,7 +1196,7 @@ namespace argparse
         /// - string
         /// - DateTime
         /// - Enum
-        /// - IEnumerable{T} (of the above)
+        /// - ImmutableArray{T} (of the above)
         /// 
         /// * Some of the types are not available on all situations, 
         /// e.g. you cannot use DateTime on a countable argument.
@@ -1189,20 +1218,20 @@ namespace argparse
             typeof(string),
             typeof(DateTime),
             typeof(Enum),
-            typeof(IEnumerable<byte>),
-            typeof(IEnumerable<sbyte>),
-            typeof(IEnumerable<short>),
-            typeof(IEnumerable<int>),
-            typeof(IEnumerable<uint>),
-            typeof(IEnumerable<long>),
-            typeof(IEnumerable<ulong>),
-            typeof(IEnumerable<float>),
-            typeof(IEnumerable<double>),
-            typeof(IEnumerable<decimal>),
-            typeof(IEnumerable<char>),
-            typeof(IEnumerable<string>),
-            typeof(IEnumerable<DateTime>),
-            typeof(IEnumerable<Enum>)
+            typeof(ImmutableArray<byte>),
+            typeof(ImmutableArray<sbyte>),
+            typeof(ImmutableArray<short>),
+            typeof(ImmutableArray<int>),
+            typeof(ImmutableArray<uint>),
+            typeof(ImmutableArray<long>),
+            typeof(ImmutableArray<ulong>),
+            typeof(ImmutableArray<float>),
+            typeof(ImmutableArray<double>),
+            typeof(ImmutableArray<decimal>),
+            typeof(ImmutableArray<char>),
+            typeof(ImmutableArray<string>),
+            typeof(ImmutableArray<DateTime>),
+            typeof(ImmutableArray<Enum>)
         };
 
         #endregion

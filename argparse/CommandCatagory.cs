@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -13,7 +14,7 @@ namespace argparse
         private ArgumentParser _parentArgumentParser;
         private List<ICommand> _commands = new List<ICommand>();
 
-        public IEnumerable<ICommand> Commands => _commands;
+        public ImmutableArray<ICommand> Commands => _commands.ToImmutableArray();
 
         public string CatagoryName { get; private set; }
 

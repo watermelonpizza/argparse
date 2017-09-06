@@ -198,10 +198,12 @@ namespace argparse.UnitTests
         // TODO: Create exception test for IsMultiple on flags
 
         [Fact]
-        public void ParameterEnumerableTypesNotSupportedExceptIEnumerable()
+        public void ParameterCollectionTypesNotSupportedExceptImmutableArray()
         {
-            Assert.NotNull(ArgumentParser.Create("app").CreateParameterCatagory<MultiOptionsEnumerableType>().WithParameter(x => x.IEnumerable));
+            Assert.NotNull(ArgumentParser.Create("app").CreateParameterCatagory<MultiOptionsEnumerableType>().WithParameter(x => x.ImmutableArray));
 
+            Assert.Throws<ArgumentException>(() =>
+                ArgumentParser.Create("app").CreateParameterCatagory<MultiOptionsEnumerableType>().WithParameter(x => x.IEnumerable));
             Assert.Throws<ArgumentException>(() =>
                 ArgumentParser.Create("app").CreateParameterCatagory<MultiOptionsEnumerableType>().WithParameter(x => x.ICollection));
             Assert.Throws<ArgumentException>(() =>

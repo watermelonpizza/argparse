@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -99,87 +100,87 @@ namespace argparse.UnitTests.ArgumentParserTests
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_byte()
+        public void ArgumentParserSupportsType_ImmutableArray_byte()
         {
-            Assert.Contains(typeof(IEnumerable<byte>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<byte>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_sbyte()
+        public void ArgumentParserSupportsType_ImmutableArray_sbyte()
         {
-            Assert.Contains(typeof(IEnumerable<sbyte>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<sbyte>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_short()
+        public void ArgumentParserSupportsType_ImmutableArray_short()
         {
-            Assert.Contains(typeof(IEnumerable<short>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<short>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_int()
+        public void ArgumentParserSupportsType_ImmutableArray_int()
         {
-            Assert.Contains(typeof(IEnumerable<int>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<int>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_uint()
+        public void ArgumentParserSupportsType_ImmutableArray_uint()
         {
-            Assert.Contains(typeof(IEnumerable<uint>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<uint>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_long()
+        public void ArgumentParserSupportsType_ImmutableArray_long()
         {
-            Assert.Contains(typeof(IEnumerable<long>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<long>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_ulong()
+        public void ArgumentParserSupportsType_ImmutableArray_ulong()
         {
-            Assert.Contains(typeof(IEnumerable<ulong>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<ulong>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_float()
+        public void ArgumentParserSupportsType_ImmutableArray_float()
         {
-            Assert.Contains(typeof(IEnumerable<float>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<float>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_double()
+        public void ArgumentParserSupportsType_ImmutableArray_double()
         {
-            Assert.Contains(typeof(IEnumerable<double>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<double>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_decimal()
+        public void ArgumentParserSupportsType_ImmutableArray_decimal()
         {
-            Assert.Contains(typeof(IEnumerable<decimal>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<decimal>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_char()
+        public void ArgumentParserSupportsType_ImmutableArray_char()
         {
-            Assert.Contains(typeof(IEnumerable<char>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<char>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_string()
+        public void ArgumentParserSupportsType_ImmutableArray_string()
         {
-            Assert.Contains(typeof(IEnumerable<string>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<string>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_DateTime()
+        public void ArgumentParserSupportsType_ImmutableArray_DateTime()
         {
-            Assert.Contains(typeof(IEnumerable<DateTime>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<DateTime>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]
-        public void ArgumentParserSupportsType_IEnumerable_Enum()
+        public void ArgumentParserSupportsType_ImmutableArray_Enum()
         {
-            Assert.Contains(typeof(IEnumerable<Enum>), ArgumentParser.SupportedTypes);
+            Assert.Contains(typeof(ImmutableArray<Enum>), ArgumentParser.SupportedTypes);
         }
 
         [Fact]

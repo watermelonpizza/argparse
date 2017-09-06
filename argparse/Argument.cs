@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -58,7 +59,7 @@ namespace argparse
 
         /// <summary>
         /// Supports the ability to have multiple arguments with the same name/flag with different argumetn parameters.
-        /// The argument type <see cref="TArgument"/> must be <see cref="IEnumerable{T}"/>.
+        /// The argument type <see cref="TArgument"/> must be <see cref="ImmutableArray{T}"/>.
         /// This is set implicitlely based on the type. You cannot set this manually. 
         /// </summary>
         public bool IsMultiple { get; protected set; }
@@ -109,7 +110,25 @@ namespace argparse
             if (obj?.GetType() != ArgumentType) { } // TODO: Throw exception if different types
 
             ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
-            Property.SetValue(instance.CatagoryInstance, obj);
+
+            // If the argument is a flags enum we can't just set the value we need to perform a bitwise or on it.
+            // Because the enum type is unknown at compile time we need to go about it the long way by casting the 
+            // enum to it's base value and setting it. To bitwise or we need to get it into an integer like type.
+            if (IsFlags)
+            {
+                // Cast to long to be safe as this should cover 99.99% of enums. 
+                // Numbers > long.MaxValue will throw an exception but that is such a fringe it's not worth the effort.
+                long bitwiseResult = Convert.ToInt64(GetValue()) | Convert.ToInt64(obj);
+                
+                // Get the enums underlying type to convert the result value to the actual value that will be set
+                // You don't need the specifc enum type as the underlying type can implicitly be set
+                Type underlyingType = Enum.GetUnderlyingType(ArgumentType);
+                Property.SetValue(instance.CatagoryInstance, Convert.ChangeType(bitwiseResult, underlyingType));
+            }
+            else
+            {
+                Property.SetValue(instance.CatagoryInstance, obj);
+            }
 
             ValueSet = true;
         }
@@ -209,7 +228,7 @@ namespace argparse
             return _currentCatagory.WithArgument(argument);
         }
 
-        public IArgument<TOptions, TArgument1> WithMultiArgument<TArgument1>(Expression<Func<TOptions, IEnumerable<TArgument1>>> argument)
+        public IArgument<TOptions, TArgument1> WithMultiArgument<TArgument1>(Expression<Func<TOptions, ImmutableArray<TArgument1>>> argument)
         {
             return _currentCatagory.WithMultiArgument(argument);
         }

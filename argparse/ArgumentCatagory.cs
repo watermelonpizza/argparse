@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,7 +15,7 @@ namespace argparse
         private ICreateArgumentCatagory _catagoryCreator;
         private List<IArgument> _arguments = new List<IArgument>();
 
-        public IEnumerable<IArgument> Arguments => _arguments;
+        public ImmutableArray<IArgument> Arguments => _arguments.ToImmutableArray();
 
         public string CatagoryName { get; private set; }
 
@@ -48,7 +49,7 @@ namespace argparse
             return arg;
         }
 
-        public IArgument<TOptions, TArgument> WithMultiArgument<TArgument>(Expression<Func<TOptions, IEnumerable<TArgument>>> argument)
+        public IArgument<TOptions, TArgument> WithMultiArgument<TArgument>(Expression<Func<TOptions, ImmutableArray<TArgument>>> argument)
         {
             PropertyInfo property = (argument.Body as MemberExpression).Member as PropertyInfo;
 

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace argparse
 {
     public interface IParameterCatagory
     {
-        IEnumerable<IParameter> Parameters { get; }
+        ImmutableArray<IParameter> Parameters { get; }
 
         uint PositionStart { get; }
 

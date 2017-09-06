@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace argparse.UnitTests
@@ -10,6 +11,17 @@ namespace argparse.UnitTests
         Battlestar,
         Startrek,
         Sancuary
+    }
+
+    [Flags]
+    public enum FlaggableEnum
+    {
+        Negative = -1,
+        Nothing = 0,
+        Mercury = 1,
+        Venus = 2,
+        Earth = 4,
+        Mars = 8
     }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -66,6 +78,7 @@ namespace argparse.UnitTests
         public char Character { get; set; }
         public string String { get; set; }
         public SciFiShows Enum { get; set; }
+        public FlaggableEnum FlaggableEnum { get; set; }
         public DateTime DateTime { get; set; }
 
         public byte Byte { get; set; }
@@ -82,22 +95,23 @@ namespace argparse.UnitTests
 
     public class MultiOptions
     {
-        public IEnumerable<bool> Boolean { get; set; }
-        public IEnumerable<char> Character { get; set; }
-        public IEnumerable<string> String { get; set; }
-        public IEnumerable<SciFiShows> Enum { get; set; }
-        public IEnumerable<DateTime> DateTime { get; set; }
+        public ImmutableArray<bool> Boolean { get; set; }
+        public ImmutableArray<char> Character { get; set; }
+        public ImmutableArray<string> String { get; set; }
+        public ImmutableArray<SciFiShows> Enum { get; set; }
+        public ImmutableArray<FlaggableEnum> FlaggableEnum { get; set; }
+        public ImmutableArray<DateTime> DateTime { get; set; }
 
-        public IEnumerable<byte> Byte { get; set; }
-        public IEnumerable<sbyte> SignedByte { get; set; }
-        public IEnumerable<short> ShortValue { get; set; }
-        public IEnumerable<int> Integer { get; set; }
-        public IEnumerable<uint> UnsignedInteger { get; set; }
-        public IEnumerable<long> Long { get; set; }
-        public IEnumerable<ulong> UnsignedLong { get; set; }
-        public IEnumerable<float> Float { get; set; }
-        public IEnumerable<double> Double { get; set; }
-        public IEnumerable<decimal> Decimal { get; set; }
+        public ImmutableArray<byte> Byte { get; set; }
+        public ImmutableArray<sbyte> SignedByte { get; set; }
+        public ImmutableArray<short> ShortValue { get; set; }
+        public ImmutableArray<int> Integer { get; set; }
+        public ImmutableArray<uint> UnsignedInteger { get; set; }
+        public ImmutableArray<long> Long { get; set; }
+        public ImmutableArray<ulong> UnsignedLong { get; set; }
+        public ImmutableArray<float> Float { get; set; }
+        public ImmutableArray<double> Double { get; set; }
+        public ImmutableArray<decimal> Decimal { get; set; }
     }
 
     public class MultiOptionsEnumerableType
@@ -109,6 +123,7 @@ namespace argparse.UnitTests
         public List<int> List { get; set; }
         public IDictionary<int, int> IDictionary { get; set; }
         public Dictionary<int, int> Dictionary { get; set; }
+        public ImmutableArray<int> ImmutableArray { get; set; }
     }
 
     public class PropertyTypes

@@ -216,7 +216,7 @@ namespace argparse.UnitTests
         }
 
         [Fact]
-        public void ArgumentEnumerableArgumentTypeIsMultiple()
+        public void ArgumentMultiArgumentTypeIsMultiple()
         {
             IArgument<MultiOptions, string> argument =
                 ArgumentParser.Create("app").CreateArgumentCatagory<MultiOptions>().WithMultiArgument(x => x.String);
@@ -224,14 +224,41 @@ namespace argparse.UnitTests
             Assert.True(argument.IsMultiple);
         }
 
+        [Fact]
+        public void ArgumentEnumArgumentTypeIsEnum()
+        {
+            IArgument<BasicOptions, SciFiShows> argument =
+                ArgumentParser.Create("app").CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Enum);
+
+            Assert.True(argument.IsEnum);
+        }
+
+        [Fact]
+        public void ArgumentFlaggableEnumArgumentTypeIsFlags()
+        {
+            IArgument<BasicOptions, FlaggableEnum> argument =
+                ArgumentParser.Create("app").CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.FlaggableEnum);
+
+            Assert.True(argument.IsFlags);
+        }
+
+        [Fact]
+        public void Argument_FlaggableEnum_NotAllowedToBeMuliArgument()
+        {
+            Assert.Throws<ArgumentException>(() => 
+                ArgumentParser.Create("app").CreateArgumentCatagory<MultiOptions>().WithMultiArgument(x => x.FlaggableEnum));
+        }
+
         // TODO: Create enum tests for enum, multi enum (non flags), and flags (non multi)
         // TODO: Create exception test for IsMultiple on flags
 
         [Fact]
-        public void ArgumentEnumerableTypesNotSupportedExceptIEnumerable()
+        public void ArgumentCollectionTypesNotSupportedExceptImmutableArray()
         {
-            Assert.NotNull(ArgumentParser.Create("app").CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IEnumerable));
+            Assert.NotNull(ArgumentParser.Create("app").CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.ImmutableArray));
 
+            Assert.Throws<ArgumentException>(() =>
+                ArgumentParser.Create("app").CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.IEnumerable));
             Assert.Throws<ArgumentException>(() =>
                 ArgumentParser.Create("app").CreateArgumentCatagory<MultiOptionsEnumerableType>().WithArgument(x => x.ICollection));
             Assert.Throws<ArgumentException>(() =>

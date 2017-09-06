@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -168,9 +169,27 @@ namespace argparse.UnitTests.ArgumentParserTests
 
             parser.Parse("--string", "value", "--string",  "value2", "-s", "val3"); 
 
-            List<string> values = parser.GetArgumentCatagory<MultiOptions>().String.ToList();
+            ImmutableArray<string> values = parser.GetArgumentCatagory<MultiOptions>().String;
 
-            Assert.Equal(3, values.Count);
+            Assert.Equal(3, values.Length);
+            Assert.Equal("value", values[0]);
+            Assert.Equal("value2", values[1]);
+            Assert.Equal("val3", values[2]);
+        }
+
+        [Fact]
+        public void ParserShouldAddMultipleValuesOnMultiParamters()
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateParameterCatagory<MultiOptions>()
+                .WithMultiParameter(x => x.String);
+
+            parser.Parse("value", "value2", "val3");
+
+            ImmutableArray<string> values = parser.GetParameterCatagory<MultiOptions>().String;
+
+            Assert.Equal(3, values.Length);
             Assert.Equal("value", values[0]);
             Assert.Equal("value2", values[1]);
             Assert.Equal("val3", values[2]);
@@ -261,22 +280,37 @@ namespace argparse.UnitTests.ArgumentParserTests
             Assert.Equal(value, parser.GetArgumentCatagory<BasicOptions>().String);
         }
 
-        // TODO: Write tests for enum support, ensure enum set, multi enums set, flags set to all values
-        //[Theory]
-        //[InlineData("--enum", SciFiShows.Battlestar)]
-        //[InlineData("-e", SciFiShows.Battlestar)]
-        //public void ParserCanParseEnumType(string argument, SciFiShows enumValue)
-        //{
-        //    ArgumentParser parser = ArgumentParser.Create("app");
-        //    parser
-        //        .CreateArgumentCatagory<BasicOptions>()
-        //        .WithArgument(x => x.Enum)
-        //            .Flag('e');
+        [Theory]
+        [InlineData("--enum", SciFiShows.Battlestar)]
+        [InlineData("-e", SciFiShows.Battlestar)]
+        public void ParserCanParseEnumType(string argument, SciFiShows enumValue)
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                .WithArgument(x => x.Enum)
+                    .Flag('e');
 
-        //    parser.Parse(argument, Enum.GetName(typeof(SciFiShows), enumValue));
+            parser.Parse(argument, Enum.GetName(typeof(SciFiShows), enumValue));
 
-        //    Assert.Equal(enumValue, parser.GetArgumentCatagory<BasicOptions>().Enum);
-        //}
+            Assert.Equal(enumValue, parser.GetArgumentCatagory<BasicOptions>().Enum);
+        }
+
+        [Theory]
+        [InlineData("--flaggable-enum", FlaggableEnum.Mercury, FlaggableEnum.Earth)]
+        [InlineData("-f", FlaggableEnum.Mercury, FlaggableEnum.Earth)]
+        public void ParserCanParseFlaggableEnumType(string argument, FlaggableEnum enumValue, FlaggableEnum secondEnumValue)
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                .WithArgument(x => x.FlaggableEnum)
+                    .Flag('f');
+
+            parser.Parse(argument, Enum.GetName(typeof(FlaggableEnum), enumValue), argument, Enum.GetName(typeof(FlaggableEnum), secondEnumValue));
+
+            Assert.Equal(enumValue | secondEnumValue, parser.GetArgumentCatagory<BasicOptions>().FlaggableEnum);
+        }
 
         [Theory]
         [InlineData("--date-time", "9/10/2014")]

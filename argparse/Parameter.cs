@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -103,7 +104,7 @@ namespace argparse
             return _currentCatagory.WithParameter(argument);
         }
 
-        public IParameter<TArgumentOptions, TArgument1> WithMultiParameter<TArgument1>(Expression<Func<TArgumentOptions, IEnumerable<TArgument1>>> argument)
+        public IParameter<TArgumentOptions, TArgument1> WithMultiParameter<TArgument1>(Expression<Func<TArgumentOptions, ImmutableArray<TArgument1>>> argument)
         {
             return _currentCatagory.WithMultiParameter(argument);
         }

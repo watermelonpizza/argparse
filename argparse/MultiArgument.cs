@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -41,33 +42,31 @@ namespace argparse
                 {
                     ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
 
-                    // If the property is enumerable and if it's not null cast to a list, add the new value and set it back
-                    if (Property.GetValue(instance.CatagoryInstance) != null)
+                    // If the property is an ImmutableArray
+                    if (Property.GetValue(instance.CatagoryInstance) is ImmutableArray<TArgument> propValue)
                     {
-                        if (Property.GetValue(instance.CatagoryInstance) is IEnumerable<TArgument> propValue)
+                        // If it's not default, add the new value and set it back
+                        if (propValue.IsDefault)
                         {
-                            IList<TArgument> propListValue = propValue.ToList();
-                            propListValue.Add((TArgument)obj);
-                            Property.SetValue(instance.CatagoryInstance, propListValue);
+                            Property.SetValue(
+                                instance.CatagoryInstance,
+                                ImmutableArray.Create((TArgument)obj));
+
+                            ValueSet = true;
+
+                        }
+                        // Otherwise create a new list and set the property
+                        else
+                        {
+                            ImmutableArray<TArgument> newPropertyArray = propValue.Add((TArgument)obj);
+                            Property.SetValue(instance.CatagoryInstance, newPropertyArray);
 
                             ValueSet = true;
                         }
-                        else
-                        {
-                            // TODO: Can't be not IEnumerable<TArgument> (can't get here?)
-                        }
                     }
-                    // Otherwise create a new list and set the property
                     else
                     {
-                        Property.SetValue(
-                            instance.CatagoryInstance,
-                            new List<TArgument>
-                            {
-                                (TArgument)obj
-                            });
-
-                        ValueSet = true;
+                        // TODO: Can't be not ImmutableArray<TArgument> (can't get here?)
                     }
                 }
                 catch (Exception)
@@ -78,10 +77,10 @@ namespace argparse
             }
             else
             {
-                // TODO: Throw exception why cannot add to non multiple
+                throw new Exception($"Tried to add a value to the MultiArgument '{ArgumentName}' but the IsMultiple flag wasn't set.");
             }
         }
-        
+
         public override IArgument<TOptions, TArgument> Countable()
         {
             throw new Exception($"This argument cannot be set to countable as it is a multi-argument.");

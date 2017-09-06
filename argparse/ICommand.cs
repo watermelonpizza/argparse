@@ -11,7 +11,7 @@ namespace argparse
 
         string CommandHelp { get; }
 
-        string CommandSummary { get; }
+        string CommandDescription { get; }
 
         PropertyInfo Property { get; }
     }
