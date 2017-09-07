@@ -15,7 +15,7 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Boolean);
+                    .WithArgument(x => x.Boolean);
 
             parser.Parse("--boolean");
 
@@ -28,8 +28,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Boolean)
-                    .Flag('b');
+                    .WithArgument(x => x.Boolean)
+                        .Flag('b');
 
             parser.Parse("-b");
 
@@ -44,8 +44,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Boolean)
-                    .Flag('b');
+                    .WithArgument(x => x.Boolean)
+                        .Flag('b');
 
             parser.Parse(argumentWithWindowsPrefix);
 
@@ -60,8 +60,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Boolean)
-                    .Flag('b');
+                    .WithArgument(x => x.Boolean)
+                        .Flag('b');
 
             parser.Parse(argumentWithStandardPrefix);
 
@@ -78,8 +78,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.String)
-                    .Flag('s');
+                    .WithArgument(x => x.String)
+                        .Flag('s');
 
             parser.Parse(argumentUsingWindowsDelimiterWithValue);
 
@@ -96,12 +96,105 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.String)
-                    .Flag('s');
+                    .WithArgument(x => x.String)
+                        .Flag('s');
 
             parser.Parse(argumentUsingEqualsDelimiterWithValue);
 
             Assert.Equal(value, parser.GetArgumentCatagory<BasicOptions>().String);
+        }
+
+        [Theory]
+        // User for this case types in: (c# removes the "" around value 2)
+        // app.exe --string=value1,"value 2" 
+        [InlineData("--string=value1,value 2", "value1", "value 2")]
+        [InlineData("--string=value1,value 2,value3", "value1", "value 2", "value3")]
+        [InlineData("--string=value1,value2,value3", "value1", "value2", "value3")]
+        [InlineData("-s=value1,value 2", "value1", "value 2")]
+        [InlineData("-s=value1,value 2,value3", "value1", "value 2", "value3")]
+        [InlineData("-s=value1,value2,value3", "value1", "value2", "value3")]
+        [InlineData("/string=value1,value 2", "value1", "value 2")]
+        [InlineData("/string=value1,value 2,value3", "value1", "value 2", "value3")]
+        [InlineData("/string=value1,value2,value3", "value1", "value2", "value3")]
+        [InlineData("/s=value1,value 2", "value1", "value 2")]
+        [InlineData("/s=value1,value 2,value3", "value1", "value 2", "value3")]
+        [InlineData("/s=value1,value2,value3", "value1", "value2", "value3")]
+        public void ParserCanHandleCommaSeperatedValuesOnDeliminatedArgument(string argumentWithCommaSeperatedValues, params string[] values)
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateArgumentCatagory<MultiOptions>()
+                    .WithMultiArgument(x => x.String)
+                        .Flag('s');
+
+            parser.Parse(argumentWithCommaSeperatedValues);
+
+            ImmutableArray<string> parsedValues = parser.GetArgumentCatagory<MultiOptions>().String;
+            
+            Assert.Equal(values.Length, parsedValues.Length);
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                Assert.Equal(values[i], parsedValues[i]);
+            }
+        }
+
+        [Theory]
+        // User for this case types in: (c# removes the "" around value 2)
+        // app.exe --string value1,"value 2" 
+        [InlineData(new[] { "--string", "value1,value2", "--string", "value3" }, "value1,value2", "value3")]
+        [InlineData(new[] { "--string", "value1,value 2", "--string", "value3" }, "value1,value 2", "value3")]
+        [InlineData(new[] { "--string", "value1,value 2,value3", "--string", "value4" }, "value1,value 2,value3", "value4")]
+        [InlineData(new[] { "-s", "value1,value2", "-s", "value3" }, "value1,value2", "value3")]
+        [InlineData(new[] { "-s", "value1,value 2", "-s", "value3" }, "value1,value 2", "value3")]
+        [InlineData(new[] { "-s", "value1,value 2,value3", "-s", "value4" }, "value1,value 2,value3", "value4")]
+        [InlineData(new[] { "/string", "value1,value2", "/string", "value3" }, "value1,value2", "value3")]
+        [InlineData(new[] { "/string", "value1,value 2", "/string", "value3" }, "value1,value 2", "value3")]
+        [InlineData(new[] { "/string", "value1,value 2,value3", "/string", "value4" }, "value1,value 2,value3", "value4")]
+        [InlineData(new[] { "/s", "value1,value2", "/s", "value3" }, "value1,value2", "value3")]
+        [InlineData(new[] { "/s", "value1,value 2", "/s", "value3" }, "value1,value 2", "value3")]
+        [InlineData(new[] { "/s", "value1,value 2,value3", "/s", "value4" }, "value1,value 2,value3", "value4")]
+        public void ParserTreatsArgumentsSeperateFromNameWithCommasAsSingleValue(string[] argumentWithCommaSeperatedValues, params string[] values)
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateArgumentCatagory<MultiOptions>()
+                    .WithMultiArgument(x => x.String)
+                        .Flag('s');
+
+            parser.Parse(argumentWithCommaSeperatedValues);
+
+            ImmutableArray<string> parsedValues = parser.GetArgumentCatagory<MultiOptions>().String;
+
+            Assert.Equal(values.Length, parsedValues.Length);
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                Assert.Equal(values[i], parsedValues[i]);
+            }
+        }
+
+        [Theory]
+        [InlineData(new[] { "--flaggable-enum", "mars" }, FlaggableEnum.Mars)]
+        [InlineData(new[] { "--flaggable-enum", "earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        [InlineData(new[] { "--flaggable-enum=earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        [InlineData(new[] { "-f", "earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        [InlineData(new[] { "-f=earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        [InlineData(new[] { "/flaggable-enum", "earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        [InlineData(new[] { "/flaggable-enum=earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        [InlineData(new[] { "/f", "earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        [InlineData(new[] { "/f=earth,mars,jupiter" }, FlaggableEnum.Earth | FlaggableEnum.Mars | FlaggableEnum.Jupiter)]
+        public void ParserCanHandleCommaSeperatedValuesOnFlaggableEnums(string[] argumentWithCommaSeperatedValues, FlaggableEnum value)
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                    .WithArgument(x => x.FlaggableEnum)
+                        .Flag('f');
+
+            parser.Parse(argumentWithCommaSeperatedValues);
+            
+            Assert.Equal(value, parser.GetArgumentCatagory<BasicOptions>().FlaggableEnum);
         }
 
         [Theory]
@@ -129,10 +222,10 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Boolean)
-                    .Flag('b')
-                .WithArgument(x => x.Byte)
-                    .Flag('B');
+                    .WithArgument(x => x.Boolean)
+                        .Flag('b')
+                    .WithArgument(x => x.Byte)
+                        .Flag('B');
 
             parser.Parse("-B", "10");
 
@@ -150,8 +243,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.String)
-                    .Flag('s');
+                    .WithArgument(x => x.String)
+                        .Flag('s');
 
             parser.Parse(argument, value);
 
@@ -164,8 +257,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<MultiOptions>()
-                .WithMultiArgument(x => x.String)
-                    .Flag('s');
+                    .WithMultiArgument(x => x.String)
+                        .Flag('s');
 
             parser.Parse("--string", "value", "--string",  "value2", "-s", "val3"); 
 
@@ -178,12 +271,25 @@ namespace argparse.UnitTests.ArgumentParserTests
         }
 
         [Fact]
+        public void ParserShouldSetParameterValue()
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateParameterCatagory<BasicOptions>()
+                    .WithParameter(x => x.String);
+
+            parser.Parse("value");
+
+            Assert.Equal("value", parser.GetParameterCatagory<BasicOptions>().String);
+        }
+
+        [Fact]
         public void ParserShouldAddMultipleValuesOnMultiParamters()
         {
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateParameterCatagory<MultiOptions>()
-                .WithMultiParameter(x => x.String);
+                    .WithMultiParameter(x => x.String);
 
             parser.Parse("value", "value2", "val3");
 
@@ -207,9 +313,9 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Integer)
-                    .Flag('i')
-                    .Countable();
+                    .WithArgument(x => x.Integer)
+                        .Flag('i')
+                        .Countable();
 
             parser.Parse(argument);
 
@@ -226,8 +332,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Boolean)
-                    .Flag('b');
+                    .WithArgument(x => x.Boolean)
+                        .Flag('b');
 
             parser.Parse(argument);
 
@@ -252,8 +358,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Character)
-                    .Flag('c');
+                    .WithArgument(x => x.Character)
+                        .Flag('c');
 
             parser.Parse(argument, character);
 
@@ -272,8 +378,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.String)
-                    .Flag('s');
+                    .WithArgument(x => x.String)
+                        .Flag('s');
 
             parser.Parse(argument, value);
 
@@ -288,8 +394,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Enum)
-                    .Flag('e');
+                    .WithArgument(x => x.Enum)
+                        .Flag('e');
 
             parser.Parse(argument, Enum.GetName(typeof(SciFiShows), enumValue));
 
@@ -304,12 +410,28 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.FlaggableEnum)
-                    .Flag('f');
+                    .WithArgument(x => x.FlaggableEnum)
+                        .Flag('f');
 
             parser.Parse(argument, Enum.GetName(typeof(FlaggableEnum), enumValue), argument, Enum.GetName(typeof(FlaggableEnum), secondEnumValue));
 
             Assert.Equal(enumValue | secondEnumValue, parser.GetArgumentCatagory<BasicOptions>().FlaggableEnum);
+        }
+
+        [Theory]
+        [InlineData("--enum", "Battlestar", SciFiShows.Battlestar)]
+        [InlineData("--enum", "battlestar", SciFiShows.Battlestar)]
+        [InlineData("--enum", "BATTLESTAR", SciFiShows.Battlestar)]
+        public void ParserShouldBeCaseInsensitiveOnEnumNames(string argument, string value, SciFiShows enumValue)
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                    .WithArgument(x => x.Enum);
+
+            parser.Parse(argument, value);
+
+            Assert.Equal(enumValue, parser.GetArgumentCatagory<BasicOptions>().Enum);
         }
 
         [Theory]
@@ -328,8 +450,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.DateTime)
-                    .Flag('d');
+                    .WithArgument(x => x.DateTime)
+                        .Flag('d');
 
             parser.Parse(argument, value);
 
@@ -350,8 +472,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.DateTime)
-                    .Flag('d');
+                    .WithArgument(x => x.DateTime)
+                        .Flag('d');
 
             parser.Parse(argument, value);
 
@@ -370,8 +492,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Byte)
-                    .Flag('b');
+                    .WithArgument(x => x.Byte)
+                        .Flag('b');
 
             parser.Parse(argument, value);
 
@@ -392,8 +514,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.SignedByte)
-                    .Flag('s');
+                    .WithArgument(x => x.SignedByte)
+                        .Flag('s');
 
             parser.Parse(argument, value);
 
@@ -414,8 +536,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.ShortValue)
-                    .Flag('s');
+                    .WithArgument(x => x.ShortValue)
+                        .Flag('s');
 
             parser.Parse(argument, value);
 
@@ -436,8 +558,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Integer)
-                    .Flag('i');
+                    .WithArgument(x => x.Integer)
+                        .Flag('i');
 
             parser.Parse(argument, value);
 
@@ -456,8 +578,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.UnsignedInteger)
-                    .Flag('u');
+                    .WithArgument(x => x.UnsignedInteger)
+                        .Flag('u');
 
             parser.Parse(argument, value);
 
@@ -478,8 +600,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Long)
-                    .Flag('l');
+                    .WithArgument(x => x.Long)
+                        .Flag('l');
 
             parser.Parse(argument, value);
 
@@ -498,8 +620,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.UnsignedLong)
-                    .Flag('u');
+                    .WithArgument(x => x.UnsignedLong)
+                        .Flag('u');
 
             parser.Parse(argument, value);
 
@@ -520,8 +642,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Float)
-                    .Flag('f');
+                    .WithArgument(x => x.Float)
+                        .Flag('f');
 
             parser.Parse(argument, value);
 
@@ -544,8 +666,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Double)
-                    .Flag('d');
+                    .WithArgument(x => x.Double)
+                        .Flag('d');
 
             parser.Parse(argument, value);
 
@@ -558,8 +680,8 @@ namespace argparse.UnitTests.ArgumentParserTests
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
                 .CreateArgumentCatagory<BasicOptions>()
-                .WithArgument(x => x.Decimal)
-                    .Flag('d');
+                    .WithArgument(x => x.Decimal)
+                        .Flag('d');
 
             parser.Parse("--decimal", "-79228162514264337593543950335");
             Assert.Equal(decimal.MinValue, parser.GetArgumentCatagory<BasicOptions>().Decimal);
@@ -605,8 +727,9 @@ namespace argparse.UnitTests.ArgumentParserTests
         public void ParserShouldSetCommandToTrueIfCommandIsFound()
         {
             ArgumentParser parser = ArgumentParser.Create("app");
-            parser.CreateCommandCatagory<Commands>()
-                .WithCommand(x => x.FlagCommand);
+            parser
+                .CreateCommandCatagory<Commands>()
+                    .WithCommand(x => x.FlagCommand);
 
             parser.Parse("flagcommand");
 
@@ -617,8 +740,11 @@ namespace argparse.UnitTests.ArgumentParserTests
         public void ParserShouldSetArgumentOnCommandIfCommandIsFound()
         {
             ArgumentParser parser = ArgumentParser.Create("app");
-            parser.CreateCommandCatagory<Commands>()
-                .WithCommand(x => x.CommandWithArguments, (cp) => cp.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean));
+            parser
+                .CreateCommandCatagory<Commands>()
+                    .WithCommand(
+                        x => x.CommandWithArguments, 
+                        (cp) => cp.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean));
 
             parser.Parse("commandwitharguments", "--boolean");
 

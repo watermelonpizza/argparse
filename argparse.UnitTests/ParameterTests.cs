@@ -194,6 +194,59 @@ namespace argparse.UnitTests
             Assert.True(parameter.IsMultiple);
         }
 
+        [Fact]
+        public void ParameterHelpMethodSetsHelp()
+        {
+            IParameter<BasicOptions, string> parameter =
+                ArgumentParser.Create("app").CreateParameterCatagory<BasicOptions>().WithParameter(x => x.String).Help("help");
+
+            Assert.Equal("help", parameter.ParamterHelp);
+        }
+
+        [Fact]
+        public void ParametersHaveCorrectPositionOrderWithinCatagory()
+        {
+            IParameterCatagory<BasicOptions> catagory = ArgumentParser.Create("app").CreateParameterCatagory<BasicOptions>();
+            
+            IParameter<BasicOptions, string> firstParameter = catagory.WithParameter(x => x.String);
+            IParameter<BasicOptions, int> secondParamter = catagory.WithParameter(x => x.Integer);
+
+            Assert.Equal(1000u, catagory.PositionStart);
+            Assert.Equal(1000u, firstParameter.Position);
+            Assert.Equal(1001u, secondParamter.Position);
+        }
+
+        [Fact]
+        public void ParametersHaveCorrectPositionOrderBetweenCatagories()
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+            IParameterCatagory<BasicOptions> firstCatagory = parser.CreateParameterCatagory<BasicOptions>();
+            IParameterCatagory<BasicOptions> secondCatagory = parser.CreateParameterCatagory<BasicOptions>();
+            
+            IParameter<BasicOptions, string> firstCatagoryParameter = firstCatagory.WithParameter(x => x.String);
+            IParameter<BasicOptions, int> secondCatagoryParamter = secondCatagory.WithParameter(x => x.Integer);
+
+            Assert.Equal(1000u, firstCatagory.PositionStart);
+            Assert.Equal(2000u, secondCatagory.PositionStart);
+            Assert.Equal(1000u, firstCatagoryParameter.Position);
+            Assert.Equal(2000u, secondCatagoryParamter.Position);
+        }
+        
+        [Fact]
+        public void ParameterCanCreateParamterCatagory()
+        {
+            ArgumentParser parser = ArgumentParser.Create("app");
+
+            IParameterCatagory<BasicOptions> firstCatagory = parser.CreateParameterCatagory<BasicOptions>();
+            IParameter<BasicOptions, string> firstCatagoryParameter = firstCatagory.WithParameter(x => x.String);
+
+            IParameterCatagory<BasicOptions> secondCatagory = firstCatagoryParameter.CreateParameterCatagory<BasicOptions>();
+            IParameter<BasicOptions, string> secondCatagoryParamter = secondCatagory.WithParameter(x => x.String);
+
+            Assert.NotSame(firstCatagory, secondCatagory);
+            Assert.NotSame(firstCatagoryParameter, secondCatagoryParamter);
+        }
+
         // TODO: Create enum tests for enum, multi enum (non flags), and flags (non multi)
         // TODO: Create exception test for IsMultiple on flags
 

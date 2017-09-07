@@ -6,39 +6,6 @@ using System.Text.RegularExpressions;
 
 namespace argparse
 {
-    //internal enum ArgumentType
-    //{
-    //    None,
-    //    Flag,
-    //    FlagWithArgument,
-    //    Flags,
-    //    FlagsWithUnknown,
-    //    Name,
-    //    NameWithArgument,
-    //    Command,
-    //    Passthrough
-    //}
-
-    //internal struct ArgumentDetails
-    //{
-    //    public ArgumentType Type;
-    //    public string Name;
-    //    public char Flag;
-    //    public string Argument;
-
-    //    public ArgumentDetails(
-    //        ArgumentType type, 
-    //        string name = null,
-    //        char flag = ArgumentHelper.NoFlag,
-    //        string argument = null)
-    //    {
-    //        Type = type;
-    //        Name = name;
-    //        Flag = flag;
-    //        Argument = argument;
-    //    }
-    //}
-
     internal static class ArgumentHelper
     {
         internal const string FlagMatchPattern = "^[A-Za-z0-9]$";

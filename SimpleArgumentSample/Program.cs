@@ -35,64 +35,71 @@ namespace SimpleArgumentSample
                 "simpleargumentsample",
                 "Simple Argument Sample Application");
 
-            parser
-                .CreateArgumentCatagory<GeneralOptions>()
-                    .WithArgument(x => x.Flag)
-                        .Required()
-                        .Name("blah")
-                        .DefaultValue(false)
-                    .WithArgument(x => x.MyEnum)
-                        .Help("This is the enum test. Should put the possible values after this.")
-                        .DefaultValue(MyEnum.Option2)
-                    .WithArgument(x => x.CountMe)
-                        .Help("This is a reallllllllly long help content box that will have to wrap around and stuff. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
-                        .DefaultValue(10)
-                        .Countable()
-                .CreateArgumentCatagory<NetworkOptions>()
-                    .WithArgument(x => x.Integer)
-                        .Name("intplx")
-                        .Flag('i')
-                        .Help("Some help here is good for other things and stuff");
+            parser.CreateCommandCatagory<SimpleCommands>()
+                .WithCommand(c => c.Config);
 
-            parser
-                .CreateParameterCatagory<PositionalOptions>()
-                    .WithParameter(x => x.Source)
-                        .Required()
-                        .Name("longassparametername")
-                    .WithMultiParameter(x => x.Destination)
-                        .Required()
-                        .Name("dest")
-                        .Help("Paramters can have help too!");
+            parser.CreateArgumentCatagory<GeneralOptions>()
+                .WithArgument(x => x.MyEnum);
 
-            parser
-                .CreateCommandCatagory<Commands>()
-                    .WithCommand(x => x.Config, SetupConfigCommand)
-                        .Help("THis is config")
-                .CreateCommandCatagory<SimpleCommands>()
-                    .WithCommand(x => x.Config)
-                        .Name("Thisisalongcommandnamehere")
-                        .Help("Some help on this command");
+            //parser
+            //    .CreateArgumentCatagory<GeneralOptions>()
+            //        .WithArgument(x => x.Flag)
+            //            .Required()
+            //            .Name("blah")
+            //            .DefaultValue(false)
+            //        .WithArgument(x => x.MyEnum)
+            //            .Help("This is the enum test. Should put the possible values after this.")
+            //            .DefaultValue(MyEnum.Option2)
+            //        .WithArgument(x => x.CountMe)
+            //            .Help("This is a reallllllllly long help content box that will have to wrap around and stuff. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+            //            .DefaultValue(10)
+            //            .Countable()
+            //    .CreateArgumentCatagory<NetworkOptions>()
+            //        .WithArgument(x => x.Integer)
+            //            .Name("intplx")
+            //            .Flag('i')
+            //            .Help("Some help here is good for other things and stuff");
+
+            //parser
+            //    .CreateParameterCatagory<PositionalOptions>()
+            //        .WithParameter(x => x.Source)
+            //            .Required()
+            //            .Name("longassparametername")
+            //        .WithMultiParameter(x => x.Destination)
+            //            .Required()
+            //            .Name("dest")
+            //            .Help("Paramters can have help too!");
+
+            //parser
+            //    .CreateCommandCatagory<Commands>()
+            //        .WithCommand(x => x.Config, SetupConfigCommand)
+            //            .Help("THis is config")
+            //    .CreateCommandCatagory<SimpleCommands>()
+            //        .WithCommand(x => x.Config)
+            //            .Name("Thisisalongcommandnamehere")
+            //            .Help("Some help on this command");
 
             parser.Parse(args);
 
             if (parser.HelpCalled) return;
 
             GeneralOptions go = parser.GetArgumentCatagory<GeneralOptions>();
-            NetworkOptions no = parser.GetArgumentCatagory<NetworkOptions>();
-            PositionalOptions po = parser.GetParameterCatagory<PositionalOptions>();
+
+            //NetworkOptions no = parser.GetArgumentCatagory<NetworkOptions>();
+            //PositionalOptions po = parser.GetParameterCatagory<PositionalOptions>();
             
 
-            Console.WriteLine("general options");
-            Console.WriteLine(JsonConvert.SerializeObject(go));
+            //Console.WriteLine("general options");
+            //Console.WriteLine(JsonConvert.SerializeObject(go));
 
 
-            Console.WriteLine("network options");
-            Console.WriteLine(JsonConvert.SerializeObject(no));
+            //Console.WriteLine("network options");
+            //Console.WriteLine(JsonConvert.SerializeObject(no));
 
-            Console.WriteLine("positional options");
-            Console.WriteLine(JsonConvert.SerializeObject(po));
+            //Console.WriteLine("positional options");
+            //Console.WriteLine(JsonConvert.SerializeObject(po));
 
-            Console.WriteLine(parser.Passthrough);
+            //Console.WriteLine(parser.Passthrough);
 
             //Commands c = parser.GetCommandCatagory<Commands>();
             //SimpleCommands sc = parser.GetCommandCatagory<SimpleCommands>();

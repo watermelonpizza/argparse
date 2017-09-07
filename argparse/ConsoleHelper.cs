@@ -4,60 +4,82 @@ using System.Text;
 
 namespace argparse
 {
-    public static class ConsoleHelper
+    public class ConsoleHelper
     {
-        public static void WriteVerbose(string verbose)
+        ConsoleLogLevel _minConsoleLogLevel;
+
+        internal ConsoleHelper(ConsoleLogLevel minimumConsoleLogLevel)
         {
-            PrefixLevel(Level.Verbose, false);
-            Console.WriteLine(verbose);
-            Console.ResetColor();
+            _minConsoleLogLevel = minimumConsoleLogLevel;
         }
 
-        public static void WriteInfo(string info)
+        public void WriteVerbose(string verbose)
         {
-            PrefixLevel(Level.Info);
-            Console.WriteLine(info);
+            if (_minConsoleLogLevel <= ConsoleLogLevel.Verbose)
+            {
+                PrefixLevel(ConsoleLogLevel.Verbose, false);
+                Console.WriteLine(verbose);
+                Console.ResetColor();
+            }
         }
 
-        public static void WriteWarning(string warning)
+        public void WriteInfo(string info)
         {
-            PrefixLevel(Level.Warn);
-            Console.WriteLine(warning);
+            if (_minConsoleLogLevel <= ConsoleLogLevel.Info)
+            {
+                PrefixLevel(ConsoleLogLevel.Info);
+                Console.WriteLine(info);
+            }
         }
 
-        public static void WriteError(string error)
+        public void WriteWarning(string warning)
         {
-            PrefixLevel(Level.Error);
-            Console.Error.WriteLine(error);
+            if (_minConsoleLogLevel <= ConsoleLogLevel.Warn)
+            {
+                PrefixLevel(ConsoleLogLevel.Warn);
+                Console.WriteLine(warning);
+            }
         }
 
-        public static void WriteFatal(string fatal)
+        public void WriteError(string error)
         {
-            PrefixLevel(Level.Fatal);
-            Console.Error.WriteLine(fatal);
+            if (_minConsoleLogLevel <= ConsoleLogLevel.Error)
+            {
+                PrefixLevel(ConsoleLogLevel.Error);
+                Console.Error.WriteLine(error);
+            }
         }
 
-        private static void PrefixLevel(Level level, bool reset = true)
+        public void WriteFatal(string fatal)
+        {
+            if (_minConsoleLogLevel <= ConsoleLogLevel.Fatal)
+            {
+                PrefixLevel(ConsoleLogLevel.Fatal);
+                Console.Error.WriteLine(fatal);
+            }
+        }
+
+        private void PrefixLevel(ConsoleLogLevel level, bool reset = true)
         {
             switch (level)
             {
-                case Level.Verbose:
+                case ConsoleLogLevel.Verbose:
                     Console.ForegroundColor = ConsoleColor.Gray;
                     Console.Write("verb: ");
                     break;
-                case Level.Info:
+                case ConsoleLogLevel.Info:
                     Console.ForegroundColor = ConsoleColor.Gray;
                     Console.Write("info: ");
                     break;
-                case Level.Warn:
+                case ConsoleLogLevel.Warn:
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
                     Console.Write("warn: ");
                     break;
-                case Level.Error:
+                case ConsoleLogLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Error.Write("err!: ");
                     break;
-                case Level.Fatal:
+                case ConsoleLogLevel.Fatal:
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.BackgroundColor = ConsoleColor.Red;
                     Console.Error.Write("fatl: ");
@@ -70,13 +92,15 @@ namespace argparse
                 Console.ResetColor();
         }
 
-        private enum Level
-        {
-            Verbose,
-            Info,
-            Warn,
-            Error,
-            Fatal
-        }
+    }
+
+    public enum ConsoleLogLevel
+    {
+        Verbose = 0,
+        Info = 1,
+        Warn = 2,
+        Error = 4,
+        Fatal = 8,
+        None = 256
     }
 }

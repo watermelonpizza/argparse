@@ -26,6 +26,8 @@ namespace argparse
 
         public string ApplicationDescription { get; }
 
+        internal ConsoleHelper ConsoleHelper;
+
         private List<IArgumentCatagory> _argumentCatagories = new List<IArgumentCatagory>();
         private List<IParameterCatagory> _paramterCatagories = new List<IParameterCatagory>();
         private List<ICommandCatagory> _commandCatagories = new List<ICommandCatagory>();
@@ -33,24 +35,23 @@ namespace argparse
         private ArgumentParser _parentArgumentParser;
         private ICommand _commandScope;
 
-        protected ArgumentParser() { }
-
-        protected ArgumentParser(string applicationName, string preamble, string applicationDescription)
+        protected ArgumentParser(string applicationName, string preamble, string applicationDescription, ConsoleHelper consoleHelper)
         {
             Preamble = preamble;
             ApplicationName = applicationName;
             ApplicationDescription = applicationDescription;
+            ConsoleHelper = consoleHelper;
         }
 
-        protected ArgumentParser(ArgumentParser parentArgumentParser, ICommand commandScope)
-            : this(parentArgumentParser.ApplicationName, parentArgumentParser.Preamble, parentArgumentParser.ApplicationDescription)
+        protected ArgumentParser(ArgumentParser parentArgumentParser, ICommand commandScope, ConsoleHelper consoleHelper)
+            : this(parentArgumentParser.ApplicationName, parentArgumentParser.Preamble, parentArgumentParser.ApplicationDescription, consoleHelper)
         {
             _parentArgumentParser = parentArgumentParser;
             _commandScope = commandScope;
         }
 
-        public static ArgumentParser Create(string applicationName, string preamble = null, string applicationDescription = null) 
-            => new ArgumentParser(applicationName, preamble, applicationDescription);
+        public static ArgumentParser Create(string applicationName, string preamble = null, string applicationDescription = null, ConsoleLogLevel minimumConsoleLogLevel = ConsoleLogLevel.Warn) 
+            => new ArgumentParser(applicationName, preamble, applicationDescription, new ConsoleHelper(minimumConsoleLogLevel));
 
         public IArgumentCatagory<TOptions> CreateArgumentCatagory<TOptions>()
             where TOptions : class, new()
@@ -166,7 +167,7 @@ namespace argparse
                     }
                     else
                     {
-                        // TODO: Throw exception, commands cannot be some other type than bool or IArgumentParser
+                        throw new Exception($"Command '{command.CommandName}' has property type '{command.Property.Name}' which shouldn't be possible. Something wasn't set up correctly.");
                     }
                 }
                 else
@@ -186,6 +187,10 @@ namespace argparse
                 return;
             }
 
+            // TODO: Add positions to all argument errors i.e. Argument was expecting value but none found at position 'x' 
+            // if possible add indicatior? e.g.
+            // args: --my-arg value -s --something
+            // err!: Argument was expecting value but none found at position 3 'g value -s<--[ERROR]'
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -285,14 +290,13 @@ namespace argparse
                         {
                             property.SetValue(true);
 
-                            // TODO: Warn user about rest of argument if there are any there 
-                            // that they are not being read because this command is a bool type
+                            ConsoleHelper.WriteWarning($"Arguments '{string.Join(" ", nextAllArgs)}' will be ignored because command '{arg}' does not accept arguments or paramters");
 
                             return;
                         }
                         else
                         {
-                            // TODO: Throw exception, commands cannot be some other type than bool or IArgumentParser
+                            throw new Exception($"Command '{command.CommandName}' has property type '{command.Property.Name}' which shouldn't be possible. Something wasn't set up correctly.");
                         }
                     }
                     // Must be a parameter
@@ -318,7 +322,6 @@ namespace argparse
                                 }
                             }
 
-
                             // We found it so set that parameter
                             if (parameter != null)
                             {
@@ -336,7 +339,7 @@ namespace argparse
                                     }
                                     catch (Exception)
                                     {
-                                        // TODO: Catch exception and let users know of why failed to cast.
+                                        ConsoleHelper.WriteError($"Argument '{arg}' could not be added to paramter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
                                     }
                                 }
                                 else
@@ -348,7 +351,7 @@ namespace argparse
                                     }
                                     catch (Exception)
                                     {
-                                        // TODO: Catch exception and let users know of why failed to cast.
+                                        ConsoleHelper.WriteError($"Argument '{arg}' could not be assigned to paramter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
                                     }
                                 }
                             }
@@ -370,12 +373,12 @@ namespace argparse
                                     }
                                     catch (Exception)
                                     {
-                                        // TODO: Catch exception and let users know of why failed to cast.
+                                        ConsoleHelper.WriteError($"Argument '{arg}' could not be added to paramter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
                                     }
                                 }
                                 else
                                 {
-                                    // TODO: Can't set last parameter as it is not multiple/no parameter found at position parametersFound.Count
+                                    ConsoleHelper.WriteWarning($"Argument '{arg}' is going to be ignored as it does not fit any parameters at this position");
                                 }
                             }
                         }
@@ -397,7 +400,7 @@ namespace argparse
                         .Where(p => !p.ValueSet)
                         .OfType<IArgument>())
                 {
-                    Console.WriteLine($"ERR: Argument {namePrefixUsed}{argument.ArgumentName} is required but was not supplied.");
+                    ConsoleHelper.WriteError($"Argument {namePrefixUsed}{argument.ArgumentName} is required but was not supplied");
                 }
 
                 foreach (var parameter in
@@ -408,7 +411,7 @@ namespace argparse
                         .Where(p => !p.ValueSet)
                         .OfType<IParameter>())
                 {
-                    Console.WriteLine($"ERR: Paramter {parameter.ParameterName} is required but was not supplied.");
+                    ConsoleHelper.WriteError($"Paramter {parameter.ParameterName} is required but was not supplied");
                 }
 
                 // Set all the arguments that have default values which haven't been set yet
@@ -785,9 +788,11 @@ namespace argparse
             return (flagPrefixUsed, namePrefixUsed);
         }
 
+        // https://stackoverflow.com/a/22368809
         private IEnumerable<string> SplitToLines(string stringToSplit, int maximumLineLength)
         {
             var words = stringToSplit.Split(' ').Concat(new[] { "" });
+
             return words
                 .Skip(1)
                 .Aggregate(
@@ -849,7 +854,6 @@ namespace argparse
 
         private (bool success, bool nextArgumentUsed) FindNameAndSetProperty((string prefix, string argument) arg, string nextArg)
         {
-            // TODO: Support Enum Flags attribute (inherintly multi). Throw exception on IEnumerable<Enum> which is flags. Can't have multiple multiple options.
             // TODO: Parse multi values as comma seperated lists like: --files file1.txt,file2.txt,"file 3.txt"
             // TODO: Parse DateTime values as possible ticks
 
@@ -894,12 +898,12 @@ namespace argparse
                         }
                         catch (Exception)
                         {
-                            // TODO: Catch exception and let users know of why failed to cast.
+                            ConsoleHelper.WriteError($"Argument value '{nextArg}' could not be added to argument '{argument.ArgumentName.ToLowerInvariant()}' as it is expecting a '{argument.ArgumentType.Name}' type");
                         }
                     }
                     else if (argument.IsMultiple && nextArg == null)
                     {
-                        // TODO: Throw exception, cannot have multiple without an argument parameter
+                        ConsoleHelper.WriteError($"Argument '{argument.ArgumentName.ToLowerInvariant()}' is expecting a value but none was supplied");
                     }
                     // The next argument isn't an argument and this isn't a flag (not bool) so set this argument to the nextArg
                     else if (argumentRequiresValue && nextArg != null)
@@ -915,12 +919,12 @@ namespace argparse
                         }
                         catch (Exception)
                         {
-                            // TODO: Catch exception and let users know of why failed to cast.
+                            ConsoleHelper.WriteError($"Argument value '{nextArg}' could not be assigned to argument '{argument.ArgumentName.ToLowerInvariant()}' as it is expecting a '{argument.ArgumentType.Name}' type");
                         }
                     }
                     else if (argumentRequiresValue && nextArg == null)
                     {
-                        // TODO: Throw exception, cannot have non bool argument without value
+                        ConsoleHelper.WriteError($"Argument '{argument.ArgumentName.ToLowerInvariant()}' is expecting a value but none was supplied");
                     }
                     // Otherwise after all that it must be a flag so set to true
                     else
@@ -937,7 +941,7 @@ namespace argparse
 
                     if (argument.IsCountable)
                     {
-                        // TODO: Throw exception, cannot have argument on countable
+                        ConsoleHelper.WriteError($"Argument '{argument.ArgumentName.ToLowerInvariant()}' isn't expecting a value but '{argumentValue}' was used");
                     }
 
                     // If it's multiple we need to get the instance of the enumerable, cast the to type
@@ -946,15 +950,20 @@ namespace argparse
                     {
                         try
                         {
-                            // Call the internal add method to add to the property
-                            var convertedType = ConversionHelper.Convert(argumentValue, argument.ArgumentType);
-                            ((IMultiProperty)property).AddValue(convertedType);
+                            string[] commaSeperatedValues = argumentValue.Split(',');
+
+                            foreach (var value in commaSeperatedValues)
+                            {
+                                // Call the internal add method to add to the property
+                                var convertedType = ConversionHelper.Convert(value, argument.ArgumentType);
+                                ((IMultiProperty)property).AddValue(convertedType);
+                            }
 
                             return (success: true, nextArgumentUsed: false);
                         }
                         catch (Exception)
                         {
-                            // TODO: Catch exception and let users know of why failed to cast.
+                            ConsoleHelper.WriteError($"Argument value '{argumentValue}' could not be added to argument '{argument.ArgumentName.ToLowerInvariant()}' as it is expecting a '{argument.ArgumentType.Name}' type");
                         }
                     }
                     else
@@ -968,14 +977,10 @@ namespace argparse
                         }
                         catch (Exception)
                         {
-                            // TODO: Catch exception and let users know of why failed to cast.
+                            ConsoleHelper.WriteError($"Argument value '{argumentValue}' could not be assigned to argument '{argument.ArgumentName.ToLowerInvariant()}' as it is expecting a '{argument.ArgumentType.Name}' type");
                         }
                     }
                 }
-            }
-            else
-            {
-                // TODO: Throw exception, argument name not found
             }
 
             return (false, false);
@@ -1024,12 +1029,12 @@ namespace argparse
                         }
                         catch (Exception)
                         {
-                            // TODO: Catch exception and let users know of why failed to cast.
+                            ConsoleHelper.WriteError($"Argument value '{nextArg}' could not be added to argument '{argument.ArgumentName.ToLowerInvariant()}' as it is expecting a '{argument.ArgumentType.Name}' type");
                         }
                     }
                     else if (argument.IsMultiple && nextArg == null)
                     {
-                        // TODO: Throw exception, cannot have multiple without an argument parameter
+                        ConsoleHelper.WriteError($"Argument '{argument.ArgumentName.ToLowerInvariant()}' is expecting a value but none was supplied");
                     }
                     // The next argument isn't an argument and this isn't a flag (not bool) so set this argument to the nextArg
                     else if (argumentRequiresValue && nextArg != null)
@@ -1136,9 +1141,14 @@ namespace argparse
                         {
                             try
                             {
-                                // Call the internal add method to add to the property
-                                var convertedType = ConversionHelper.Convert(argumentValue, argument.ArgumentType);
-                                ((IMultiProperty)property).AddValue(convertedType);
+                                string[] commaSeperatedValues = argumentValue.Split(',');
+
+                                foreach (var value in commaSeperatedValues)
+                                {
+                                    // Call the internal add method to add to the property
+                                    var convertedType = ConversionHelper.Convert(value, argument.ArgumentType);
+                                    ((IMultiProperty)property).AddValue(convertedType);
+                                }
 
                                 return (success: true, nextArgumentUsed: false);
                             }

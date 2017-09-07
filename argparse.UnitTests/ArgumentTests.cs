@@ -280,6 +280,15 @@ namespace argparse.UnitTests
         }
 
         [Fact]
+        public void ArgumentHelpMethodSetsHelp()
+        {
+            IArgument<BasicOptions, string> parameter =
+                ArgumentParser.Create("app").CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.String).Help("help");
+
+            Assert.Equal("help", parameter.ArgumentHelp);
+        }
+
+        [Fact]
         public void ArgumentWithoutGetOrSetShouldThrowArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>

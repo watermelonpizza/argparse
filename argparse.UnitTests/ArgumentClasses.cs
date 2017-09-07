@@ -21,7 +21,8 @@ namespace argparse.UnitTests
         Mercury = 1,
         Venus = 2,
         Earth = 4,
-        Mars = 8
+        Mars = 8,
+        Jupiter = 16
     }
 
 #pragma warning disable IDE1006 // Naming Styles
