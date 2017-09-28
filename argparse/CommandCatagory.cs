@@ -59,8 +59,8 @@ namespace argparse
 
             var cmd = new Command<TOptions>(_parentArgumentParser, this, property);
             _commands.Add(cmd);
-            
-            ICommandArgumentParser commandArgParser = new CommandArgumentParser(_parentArgumentParser, cmd, _parentArgumentParser.ConsoleHelper);
+
+            ICommandArgumentParser commandArgParser = new CommandArgumentParser(_parentArgumentParser, cmd);
             parser(commandArgParser);
 
             property.SetValue(CatagoryInstance, commandArgParser);

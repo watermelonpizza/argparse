@@ -14,18 +14,39 @@ namespace argparse
         protected IParameterCatagory<TArgumentOptions> _currentCatagory;
         protected ICreateParameterCatagory _catagoryCreator;
 
+        /// <summary>
+        /// The name of the paramter which will be displayed in the help documentation
+        /// </summary>
         public string ParameterName { get; private set; } = string.Empty;
 
-        public Type ParameterType { get; }
-
+        /// <summary>
+        /// The unique position id for the parameter
+        /// </summary>
         public uint Position { get; }
 
+        /// <summary>
+        /// The type of the parameter (i.e. the type of the property)
+        /// </summary>
+        public Type ParameterType { get; }
+
+        /// <summary>
+        /// If the parameter is required
+        /// </summary>
         public bool IsRequired { get; private set; }
 
+        /// <summary>
+        /// If the parameter can accept multiple values (must be the last positioned parameter)
+        /// </summary>
         public bool IsMultiple { get; protected set; }
 
-        public string ParamterHelp { get; private set; } = string.Empty;
+        /// <summary>
+        /// The help documentation for the parameter
+        /// </summary>
+        public string ParameterHelp { get; private set; } = string.Empty;
 
+        /// <summary>
+        /// The details for the property that is bound to the parameter
+        /// </summary>
         public PropertyInfo Property { get; }
 
         public bool ValueSet { get; protected set; }
@@ -57,6 +78,41 @@ namespace argparse
             Position = position;
         }
 
+        /// <summary>
+        /// Sets the name of the parameter which is used for help documentation
+        /// </summary>
+        public IParameter<TArgumentOptions, TArgument> Name(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"{Property.Name} names cannot be empty or null.", nameof(name));
+            }
+
+            ParameterName = name;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the parameter to be required
+        /// </summary>
+        public IParameter<TArgumentOptions, TArgument> Required()
+        {
+            IsRequired = true;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the help documentation for the parameter
+        /// </summary>
+        public IParameter<TArgumentOptions, TArgument> Help(string help)
+        {
+            ParameterHelp = help;
+
+            return this;
+        }
+
         public void SetValue(object obj)
         {
             if (obj?.GetType() != typeof(TArgument)) { } // TODO: Throw exception if different types
@@ -71,32 +127,6 @@ namespace argparse
         {
             ICatagoryInstance instance = _currentCatagory as ICatagoryInstance;
             return Property.GetValue(instance.CatagoryInstance);
-        }
-
-        public IParameter<TArgumentOptions, TArgument> Help(string help)
-        {
-            ParamterHelp = help;
-
-            return this;
-        }
-
-        public IParameter<TArgumentOptions, TArgument> Name(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException($"{Property.Name} names cannot be empty or null.", nameof(name));
-            }
-
-            ParameterName = name;
-
-            return this;
-        }
-
-        public IParameter<TArgumentOptions, TArgument> Required()
-        {
-            IsRequired = true;
-
-            return this;
         }
 
         public IParameter<TArgumentOptions, TArgument1> WithParameter<TArgument1>(Expression<Func<TArgumentOptions, TArgument1>> argument)

@@ -6,8 +6,8 @@ namespace argparse
 {
     public class CommandArgumentParser : ArgumentParser, ICommandArgumentParser
     {
-        internal CommandArgumentParser(ArgumentParser parentArgumentParser, ICommand command, ConsoleHelper consoleHelper)
-            : base(parentArgumentParser, command, consoleHelper)
+        internal CommandArgumentParser(ArgumentParser parentArgumentParser, ICommand command)
+            : base(parentArgumentParser, command)
         {
 
         }

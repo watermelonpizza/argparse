@@ -164,7 +164,6 @@ namespace argparse.UnitTests
         public void CommandPropertyWithGetAndSetAccessorsPasses()
         {
             ArgumentParser.Create("app").CreateCommandCatagory<PropertyTypes>().WithCommand(x => x.GetAndSet);
-            
         }
 
         [Fact]

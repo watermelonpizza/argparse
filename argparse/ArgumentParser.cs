@@ -16,42 +16,57 @@ namespace argparse
     {
         public string[] Passthrough { get; private set; }
 
-        public bool WriteBasicHelpOnEmptyArguments { get; set; } = true;
-
         public bool HelpCalled { get; private set; }
 
-        public string Preamble { get; }
+        internal ArgumentParserOptions Options { get; }
 
-        public string ApplicationName { get; }
-
-        public string ApplicationDescription { get; }
-
-        internal ConsoleHelper ConsoleHelper;
+        internal ConsoleHelper ConsoleHelper { get; }
 
         private List<IArgumentCatagory> _argumentCatagories = new List<IArgumentCatagory>();
-        private List<IParameterCatagory> _paramterCatagories = new List<IParameterCatagory>();
+        private List<IParameterCatagory> _parameterCatagories = new List<IParameterCatagory>();
         private List<ICommandCatagory> _commandCatagories = new List<ICommandCatagory>();
 
         private ArgumentParser _parentArgumentParser;
         private ICommand _commandScope;
 
-        protected ArgumentParser(string applicationName, string preamble, string applicationDescription, ConsoleHelper consoleHelper)
+        protected ArgumentParser(ArgumentParserOptions argumentParserOptions, ConsoleHelper consoleHelper)
         {
-            Preamble = preamble;
-            ApplicationName = applicationName;
-            ApplicationDescription = applicationDescription;
+            if (argumentParserOptions.ApplicationName == null)
+                throw new Exception("Application name cannot be null");
+
+            Options = argumentParserOptions;
             ConsoleHelper = consoleHelper;
         }
 
-        protected ArgumentParser(ArgumentParser parentArgumentParser, ICommand commandScope, ConsoleHelper consoleHelper)
-            : this(parentArgumentParser.ApplicationName, parentArgumentParser.Preamble, parentArgumentParser.ApplicationDescription, consoleHelper)
+        protected ArgumentParser(ArgumentParser parentArgumentParser, ICommand commandScope)
+            : this(parentArgumentParser.Options, parentArgumentParser.ConsoleHelper)
         {
             _parentArgumentParser = parentArgumentParser;
             _commandScope = commandScope;
         }
 
-        public static ArgumentParser Create(string applicationName, string preamble = null, string applicationDescription = null, ConsoleLogLevel minimumConsoleLogLevel = ConsoleLogLevel.Warn) 
-            => new ArgumentParser(applicationName, preamble, applicationDescription, new ConsoleHelper(minimumConsoleLogLevel));
+        public static ArgumentParser Create(string applicationName)
+        {
+            ArgumentParserOptions options = new ArgumentParserOptions
+            {
+                ApplicationName = applicationName
+            };
+
+            return new ArgumentParser(options, new ConsoleHelper(options));
+        }
+
+        public static ArgumentParser Create(ArgumentParserOptions argumentParserOptions)
+        {
+            return new ArgumentParser(argumentParserOptions, new ConsoleHelper(argumentParserOptions));
+        }
+
+        public static ArgumentParser Create(Action<ArgumentParserOptions> argumentParserOptions)
+        {
+            ArgumentParserOptions options = new ArgumentParserOptions();
+            argumentParserOptions(options);
+
+            return new ArgumentParser(options, new ConsoleHelper(options));
+        }
 
         public IArgumentCatagory<TOptions> CreateArgumentCatagory<TOptions>()
             where TOptions : class, new()
@@ -82,9 +97,9 @@ namespace argparse
             where TOptions : class, new()
         {
             IParameterCatagory<TOptions> parameterCatagory
-                = new ParameterCatagory<TOptions>(this, typeof(TOptions).Name, (uint)(_paramterCatagories.Count + 1) * 1000);
+                = new ParameterCatagory<TOptions>(this, typeof(TOptions).Name, (uint)(_parameterCatagories.Count + 1) * 1000);
 
-            _paramterCatagories.Add(parameterCatagory);
+            _parameterCatagories.Add(parameterCatagory);
             return parameterCatagory;
         }
 
@@ -92,7 +107,7 @@ namespace argparse
             where TOptions : class, new()
         {
             return (TOptions)
-                (_paramterCatagories.SingleOrDefault(pac => pac is ParameterCatagory<TOptions>) as ParameterCatagory<TOptions>)
+                (_parameterCatagories.SingleOrDefault(pac => pac is ParameterCatagory<TOptions>) as ParameterCatagory<TOptions>)
                     ?.CatagoryInstance;
         }
 
@@ -113,24 +128,29 @@ namespace argparse
                     ?.CatagoryInstance;
         }
 
-        public void Parse(params string[] args)
+        /// <summary>
+        /// Parse the arguments and return true if successfull
+        /// </summary>
+        /// <param name="args">The args to be parsed, usually from the <c>static void Main(string[] args)</c> entry point function</param>
+        /// <returns><c>true</c> if no errors were encountered and all required arguments were filled, <c>false</c> if any problems were encountered</returns>
+        public bool Parse(params string[] args)
         {
-            if ((args == null || !args.Any()) && WriteBasicHelpOnEmptyArguments)
+            if ((args == null || !args.Any()) && Options.WriteBasicHelpOnEmptyArguments)
             {
                 HelpCalled = true;
                 WriteHelp(HelpDisplayMode.Compact, ArgumentHelper.FlagPrefix, ArgumentHelper.NamePrefix);
-                return;
+                return true;
             }
 
-            // Keep a record of the last parameter used so far 
+            // Keep a record of the last parameter used so far
             // so we can use it to determine the next parameter to use
-            IParameter lastParamterUsed = null;
+            IParameter lastParameterUsed = null;
 
             string flagPrefixUsed = null;
             string namePrefixUsed = null;
 
             // First check for static help argument of -h, --help, /help etc.
-            // And ensure anything before help argumnt is not a command. 
+            // And ensure anything before help argumnt is not a command.
             // If it is call help on the command.
             string helpArg;
             if ((helpArg = args.SingleOrDefault(arg => ArgumentHelper.HelpArguments.Contains(arg.ToLowerInvariant()))) != null)
@@ -157,9 +177,8 @@ namespace argparse
                     if (typeof(IArgumentParser).GetTypeInfo().IsAssignableFrom(property.Property.PropertyType.GetTypeInfo()))
                     {
                         ArgumentParser commandsArgumentParser = property.GetValue() as ArgumentParser;
-                        commandsArgumentParser.Parse(helpArg);
 
-                        return;
+                        return commandsArgumentParser.Parse(helpArg);
                     }
                     else if (property.Property.PropertyType == typeof(bool))
                     {
@@ -181,13 +200,12 @@ namespace argparse
                         WriteHelp(HelpDisplayMode.Expanded, flagPrefixUsed, namePrefixUsed);
                 }
 
-
-                // TODO: Check for help postition and call on command if nessasary
-
-                return;
+                return true;
             }
 
-            // TODO: Add positions to all argument errors i.e. Argument was expecting value but none found at position 'x' 
+            bool success = true;
+
+            // TODO: Add positions to all argument errors i.e. Argument was expecting value but none found at position 'x'
             // if possible add indicatior? e.g.
             // args: --my-arg value -s --something
             // err!: Argument was expecting value but none found at position 3 'g value -s<--[ERROR]'
@@ -236,34 +254,76 @@ namespace argparse
                             var findFlagResult = FindFlagAndSetProperty(strippedArgument, nextArg);
 
                             if (findFlagResult.success && findFlagResult.nextArgumentUsed)
+                            {
                                 i++;
+                            }
+                            else if (!findFlagResult.success)
+                            {
+                                if (Options.StrictParsing)
+                                {
+                                    ConsoleHelper.WriteError($"no such option: {arg}");
+                                    success = false;
+                                }
+                                else
+                                {
+                                    ConsoleHelper.WriteWarning($"no such option: '{arg}', ignoring");
+                                }
+                            }
                         }
                     }
                     // Passthrough argument has been defined. Anything after this isn't for us.
                     // Set the rest of the arguments to the gloabal Passthrough variable and return.
-                    // The user can check the Passthrough property if the command (if we are in one)
+                    // The user can check the Passthrough property for the command (if we are in one)
                     // or something needs external arguments
                     else if (strippedArgument.prefix == ArgumentHelper.NamePrefix && string.IsNullOrEmpty(strippedArgument.argument))
                     {
                         Passthrough = nextAllArgs;
-                        return;
+                        return success;
                     }
                     else if (strippedArgument.prefix == ArgumentHelper.NamePrefix)
                     {
                         var findNameResult = FindNameAndSetProperty(strippedArgument, nextArg);
 
                         if (findNameResult.success && findNameResult.nextArgumentUsed)
+                        {
                             i++;
+                        }
+                        else if (!findNameResult.success)
+                        {
+                            if (Options.StrictParsing)
+                            {
+                                ConsoleHelper.WriteError($"no such option: {arg}");
+                                success = false;
+                            }
+                            else
+                            {
+                                ConsoleHelper.WriteWarning($"no such option: '{arg}', ignoring");
+                            }
+                        }
                     }
                     else if (strippedArgument.prefix == ArgumentHelper.FlagPrefix)
                     {
                         var findFlagResult = FindFlagAndSetProperty(strippedArgument, nextArg);
 
                         if (findFlagResult.success && findFlagResult.nextArgumentUsed)
+                        {
                             i++;
+                        }
+                        else if (!findFlagResult.success)
+                        {
+                            if (Options.StrictParsing)
+                            {
+                                ConsoleHelper.WriteError($"no such option: {arg}");
+                                success = false;
+                            }
+                            else
+                            {
+                                ConsoleHelper.WriteWarning($"no such option: '{arg}', ignoring");
+                            }
+                        }
                     }
                 }
-                // This is either a command or a parameter 
+                // This is either a command or a parameter
                 else
                 {
                     ICommand command =
@@ -282,17 +342,21 @@ namespace argparse
                         {
                             CommandArgumentParser commandsArgumentParser = property.GetValue() as CommandArgumentParser;
                             commandsArgumentParser.Selected = true;
-                            commandsArgumentParser.Parse(nextAllArgs);
 
-                            return;
+                            return success && commandsArgumentParser.Parse(nextAllArgs);
                         }
                         else if (property.Property.PropertyType == typeof(bool))
                         {
                             property.SetValue(true);
 
-                            ConsoleHelper.WriteWarning($"Arguments '{string.Join(" ", nextAllArgs)}' will be ignored because command '{arg}' does not accept arguments or paramters");
+                            if (nextAllArgs.Any())
+                            {
+                                ConsoleHelper.WriteWarning($"arguments '{string.Join(" ", nextAllArgs)}' will be ignored because command '{arg}' does not accept arguments or parameters");
 
-                            return;
+                                return false;
+                            }
+
+                            return true;
                         }
                         else
                         {
@@ -302,15 +366,15 @@ namespace argparse
                     // Must be a parameter
                     else
                     {
-                        var parameters = _paramterCatagories.SelectMany(pc => pc.Parameters);
+                        var parameters = _parameterCatagories.SelectMany(pc => pc.Parameters);
 
                         // If there are any parameters, look for the position we are at
                         if (parameters.Any())
                         {
-                            // Get the lowest positioned paramter based on the last parameter used up
-                            IParameter parameter = lastParamterUsed ?? parameters.Min();
+                            // Get the lowest positioned parameter based on the last parameter used up
+                            IParameter parameter = lastParameterUsed ?? parameters.Min();
 
-                            if (lastParamterUsed == null)
+                            if (lastParameterUsed == null)
                             {
                                 parameter = parameters.Min();
                             }
@@ -325,7 +389,7 @@ namespace argparse
                             // We found it so set that parameter
                             if (parameter != null)
                             {
-                                lastParamterUsed = parameter;
+                                lastParameterUsed = parameter;
 
                                 IProperty property = parameter as IProperty;
 
@@ -339,7 +403,8 @@ namespace argparse
                                     }
                                     catch (Exception)
                                     {
-                                        ConsoleHelper.WriteError($"Argument '{arg}' could not be added to paramter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
+                                        ConsoleHelper.WriteError($"argument '{arg}' could not be added to parameter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
+                                        success = false;
                                     }
                                 }
                                 else
@@ -351,7 +416,8 @@ namespace argparse
                                     }
                                     catch (Exception)
                                     {
-                                        ConsoleHelper.WriteError($"Argument '{arg}' could not be assigned to paramter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
+                                        ConsoleHelper.WriteError($"argument '{arg}' could not be assigned to parameter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
+                                        success = false;
                                     }
                                 }
                             }
@@ -373,12 +439,22 @@ namespace argparse
                                     }
                                     catch (Exception)
                                     {
-                                        ConsoleHelper.WriteError($"Argument '{arg}' could not be added to paramter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
+                                        ConsoleHelper.WriteError($"argument '{arg}' could not be added to parameter '{parameter.ParameterName.ToUpperInvariant()}' as it is expecting a '{parameter.ParameterType.Name}' type");
+                                        success = false;
                                     }
                                 }
                                 else
                                 {
-                                    ConsoleHelper.WriteWarning($"Argument '{arg}' is going to be ignored as it does not fit any parameters at this position");
+                                    if (Options.StrictParsing)
+                                    {
+
+                                        ConsoleHelper.WriteError($"parameter '{arg}' does not fit any known parameters at this position");
+                                        success = false;
+                                    }
+                                    else
+                                    {
+                                        ConsoleHelper.WriteWarning($"parameter '{arg}' was ignored as it does not fit any known parameters at this position");
+                                    }
                                 }
                             }
                         }
@@ -388,10 +464,10 @@ namespace argparse
 
             flagPrefixUsed = flagPrefixUsed ?? ArgumentHelper.FlagPrefix;
             namePrefixUsed = namePrefixUsed ?? ArgumentHelper.NamePrefix;
-            
+
             if (!HelpCalled)
             {
-                // Ensure that all required arguments/paramters are set
+                // Ensure that all required arguments/parameters are set
                 foreach (var argument in
                     _argumentCatagories
                         .SelectMany(ac => ac.Arguments)
@@ -400,22 +476,24 @@ namespace argparse
                         .Where(p => !p.ValueSet)
                         .OfType<IArgument>())
                 {
-                    ConsoleHelper.WriteError($"Argument {namePrefixUsed}{argument.ArgumentName} is required but was not supplied");
+                    ConsoleHelper.WriteError($"argument '{namePrefixUsed}{argument.ArgumentName}' is required");
+                    success = false;
                 }
 
                 foreach (var parameter in
-                    _paramterCatagories
+                    _parameterCatagories
                         .SelectMany(pc => pc.Parameters)
                         .Where(p => p.IsRequired)
                         .OfType<IProperty>()
                         .Where(p => !p.ValueSet)
                         .OfType<IParameter>())
                 {
-                    ConsoleHelper.WriteError($"Paramter {parameter.ParameterName} is required but was not supplied");
+                    ConsoleHelper.WriteError($"parameter '{parameter.ParameterName}' is required");
+                    success = false;
                 }
 
                 // Set all the arguments that have default values which haven't been set yet
-                foreach (var argumentProperty in 
+                foreach (var argumentProperty in
                     _argumentCatagories
                     .SelectMany(ac => ac.Arguments)
                     .Where(a => a.ArgumentDefaultSet)
@@ -427,7 +505,19 @@ namespace argparse
                     if (!argumentProperty.ValueSet)
                         argumentProperty.SetValue(argument.ArgumentDefaultValue);
                 }
+
+                if (success && (args == null || !args.Any()))
+                {
+                    WriteHelp(HelpDisplayMode.Compact, ArgumentHelper.FlagPrefix, ArgumentHelper.NamePrefix);
+                }
+                else
+                {
+                    ConsoleHelper.WriteLine();
+                    WriteHelp(HelpDisplayMode.JustUsage, ArgumentHelper.FlagPrefix, ArgumentHelper.NamePrefix);
+                }
             }
+
+            return success;
         }
 
         internal void WriteHelp(HelpDisplayMode displayMode, string flagPrefixUsed, string namePrefixUsed)
@@ -435,15 +525,15 @@ namespace argparse
             StringBuilder sb = new StringBuilder();
 
             // Write out the preable (copyright or such details)
-            if (!string.IsNullOrWhiteSpace(Preamble))
+            if (!string.IsNullOrWhiteSpace(Options.Preamble))
             {
-                sb.Append(Preamble);
+                sb.Append(Options.Preamble);
                 sb.AppendLine();
                 sb.AppendLine();
             }
-            
+
             // Write out the usage of the application
-            sb.Append($"Usage: {ApplicationName}");
+            sb.Append($"Usage: {Options.ApplicationName}");
 
             // If the main argument parser has arguements ensure to include the options part before the command
             if (_parentArgumentParser != null &&
@@ -457,8 +547,8 @@ namespace argparse
             if (_argumentCatagories.Any())
                 sb.Append(" [OPTIONS]");
 
-            // Loop over all the paramters and print them out in order
-            foreach (var parameter in _paramterCatagories.SelectMany(pc => pc.Parameters).OrderBy(p => p.Position))
+            // Loop over all the parameters and print them out in order
+            foreach (var parameter in _parameterCatagories.SelectMany(pc => pc.Parameters).OrderBy(p => p.Position))
             {
                 sb.Append(" ");
 
@@ -481,290 +571,293 @@ namespace argparse
 
             sb.AppendLine();
 
-            // If we are within a command print out its description
-            if (!string.IsNullOrWhiteSpace(_commandScope?.CommandDescription))
+            if (displayMode != HelpDisplayMode.JustUsage)
             {
-                sb.AppendLine(_commandScope.CommandDescription);
-            }
-            // Otherwise print out the applications description
-            else if (!string.IsNullOrWhiteSpace(ApplicationDescription))
-            {
-                sb.AppendLine(ApplicationDescription);
-            }
-
-            // If we are in compact mode (i.e. no argument called, just the application was called without any args)
-            if (displayMode == HelpDisplayMode.Compact)
-            {
-                sb.AppendLine();
-
-                sb.AppendLine($"Run '{ApplicationName} --help' to see a list of all options and more information.");
-            }
-            // Otherwise prepair to print off all the help documentation
-            else
-            {
-                // Next few lines determine what the longest possible length for all
-                // of the commands/argument/paramters to align the help correctly
-                // e.g.
-                // Options:
-                //   --arg1             |
-                //   --arg10            |
-                //                      |
-                // Paramters:           |
-                //   somelongparameter  |<- Help starts on that column 2 off the longest.
-                //
-
-                int argumentStartLength = _argumentCatagories.Count == 1 ? 2 : 4;
-                int commandStartLength = _commandCatagories.Count == 1 ? 2 : 4;
-                int paramterStartLength = _paramterCatagories.Count == 1 ? 2 : 4;
-
-                int helpIndentLength =
-                    _argumentCatagories
-                        .SelectMany(ac => ac.Arguments)
-                        .MaxOrDefault(a => GetArgumentLength(argumentStartLength, a, displayMode == HelpDisplayMode.Full));
-
-                helpIndentLength =
-                    Math.Max(
-                        helpIndentLength,
-                        _commandCatagories
-                            .SelectMany(cc => cc.Commands)
-                            .MaxOrDefault(c => GetCommandLength(commandStartLength, c)));
-
-                helpIndentLength =
-                    Math.Max(
-                        helpIndentLength,
-                        _paramterCatagories
-                            .SelectMany(pc => pc.Parameters)
-                            .MaxOrDefault(p => GetParamterLength(paramterStartLength, p)));
-
-                helpIndentLength += 2;
-
-                // For when the help wraps over multiple lines, prepend this blank string
-                string helpPreSpacing = string.Join("", Enumerable.Repeat(" ", helpIndentLength));
-
-                // However the available width will bottom out at 20 charaters
-                // If the console is too small, it will just text wrap. Can't do anything about it.
-                int availableWidth = Math.Max(20, Console.WindowWidth - helpIndentLength);
-
-                // If there any any arguments loop over them all and print out the doco.
-                if (_argumentCatagories.Any())
+                // If we are within a command print out its description
+                if (!string.IsNullOrWhiteSpace(_commandScope?.CommandSummary))
                 {
-                    string argumentPreSpacing = string.Join("", Enumerable.Repeat(" ", argumentStartLength));
-                    string enumPreSpacing = string.Join("", Enumerable.Repeat(" ", argumentStartLength + 3));
+                    sb.AppendLine(_commandScope.CommandSummary);
+                }
+                // Otherwise print out the applications description
+                else if (!string.IsNullOrWhiteSpace(Options.ApplicationDescription))
+                {
+                    sb.AppendLine(Options.ApplicationDescription);
+                }
 
+                // If we are in compact mode (i.e. no argument called, just the application was called without any args)
+                if (displayMode == HelpDisplayMode.Compact)
+                {
                     sb.AppendLine();
-                    sb.AppendLine("Options:");
 
-                    foreach (var argCatagory in _argumentCatagories)
+                    sb.AppendLine($"Run '{Options.ApplicationName} --help' or '{Options.ApplicationName} --help full' to see a list of all options and more information.");
+                }
+                // Otherwise prepair to print off all the help documentation
+                else
+                {
+                    // Next few lines determine what the longest possible length for all
+                    // of the commands/argument/parameters to align the help correctly
+                    // e.g.
+                    // Options:
+                    //   --arg1             |
+                    //   --arg10            |
+                    //                      |
+                    // Parameters:           |
+                    //   somelongparameter  |<- Help starts on that column 2 off the longest.
+                    //
+
+                    int argumentStartLength = _argumentCatagories.Count == 1 ? 2 : 4;
+                    int commandStartLength = _commandCatagories.Count == 1 ? 2 : 4;
+                    int parameterStartLength = _parameterCatagories.Count == 1 ? 2 : 4;
+
+                    int helpIndentLength =
+                        _argumentCatagories
+                            .SelectMany(ac => ac.Arguments)
+                            .MaxOrDefault(a => GetArgumentLength(argumentStartLength, a, displayMode == HelpDisplayMode.Full));
+
+                    helpIndentLength =
+                        Math.Max(
+                            helpIndentLength,
+                            _commandCatagories
+                                .SelectMany(cc => cc.Commands)
+                                .MaxOrDefault(c => GetCommandLength(commandStartLength, c)));
+
+                    helpIndentLength =
+                        Math.Max(
+                            helpIndentLength,
+                            _parameterCatagories
+                                .SelectMany(pc => pc.Parameters)
+                                .MaxOrDefault(p => GetParamterLength(parameterStartLength, p)));
+
+                    helpIndentLength += 2;
+
+                    // For when the help wraps over multiple lines, prepend this blank string
+                    string helpPreSpacing = string.Join("", Enumerable.Repeat(" ", helpIndentLength));
+
+                    // However the available width will bottom out at 20 charaters
+                    // If the console is too small, it will just text wrap. Can't do anything about it.
+                    int availableWidth = Math.Max(20, Console.WindowWidth - helpIndentLength);
+
+                    // If there any any arguments loop over them all and print out the doco.
+                    if (_argumentCatagories.Any())
                     {
-                        if (_argumentCatagories.Count > 1)
+                        string argumentPreSpacing = string.Join("", Enumerable.Repeat(" ", argumentStartLength));
+                        string enumPreSpacing = string.Join("", Enumerable.Repeat(" ", argumentStartLength + 3));
+
+                        sb.AppendLine();
+                        sb.AppendLine("Options:");
+
+                        foreach (var argCatagory in _argumentCatagories)
                         {
-                            if (argCatagory != _argumentCatagories.First())
+                            if (_argumentCatagories.Count > 1)
                             {
-                                sb.AppendLine();
-                            }
-
-                            sb.AppendLine($"  {argCatagory.CatagoryName}:");
-                        }
-
-                        foreach (var argument in argCatagory.Arguments)
-                        {
-                            string argumentHelp = "";
-
-                            if (argument.ArgumentFlag != ArgumentHelper.NoFlag)
-                            {
-                                argumentHelp += $"{flagPrefixUsed}{argument.ArgumentFlag}, ";
-                            }
-
-                            argumentHelp += $"{namePrefixUsed}{argument.ArgumentName}";
-
-                            sb.Append((argumentPreSpacing + argumentHelp).PadRight(helpIndentLength));
-
-                            string helpText = argument.ArgumentHelp;
-
-                            if (argument.IsEnum && displayMode != HelpDisplayMode.Full)
-                            {
-                                if (helpText.Length != 0)
-                                    helpText += " ";
-
-                                helpText += $"(values {string.Join(", ", Enum.GetNames(argument.ArgumentType)).ToLowerInvariant()})";
-                            }
-
-                            if (argument.ArgumentDefaultSet)
-                            {
-                                if (helpText.Length != 0)
-                                    helpText += " ";
-
-                                helpText += $"(default {argument.ArgumentDefaultValue.ToString().ToLowerInvariant()})";
-                            }
-
-                            if (helpText.Length > availableWidth)
-                            {
-                                IEnumerable<string> split = SplitToLines(helpText, availableWidth);
-                                foreach (var line in split)
+                                if (argCatagory != _argumentCatagories.First())
                                 {
-                                    if (line == split.First())
-                                        sb.Append(line);
-                                    else
-                                        sb.Append(helpPreSpacing + line);
-
-                                    if ((helpPreSpacing + line).Length != Console.WindowWidth)
-                                        sb.AppendLine();
+                                    sb.AppendLine();
                                 }
-                            }
-                            else
-                            {
-                                sb.AppendLine(helpText);
+
+                                sb.AppendLine($"  {argCatagory.CatagoryName}:");
                             }
 
-                            // If the display is in full mode write out the enum values as a list
-                            // with their help text if they have any
-                            if (argument.IsEnum && displayMode == HelpDisplayMode.Full)
+                            foreach (var argument in argCatagory.Arguments)
                             {
-                                // Has to filter out value__ because GetRuntimeFields() also includes the internal
-                                // enum value field. Better methods don't exist at netstandard1.3
-                                foreach (var enumValue in argument.ArgumentType.GetRuntimeFields().Where(f => f.Name != "value__"))
+                                string argumentHelp = "";
+
+                                if (argument.ArgumentFlag != ArgumentHelper.NoFlag)
                                 {
-                                    sb.Append((enumPreSpacing + enumValue.Name.ToLowerInvariant()).PadRight(helpIndentLength));
+                                    argumentHelp += $"{flagPrefixUsed}{argument.ArgumentFlag}, ";
+                                }
 
-                                    var helpAttribute = enumValue.GetCustomAttribute<HelpAttribute>();
+                                argumentHelp += $"{namePrefixUsed}{argument.ArgumentName}";
 
-                                    if (helpAttribute != null)
+                                sb.Append((argumentPreSpacing + argumentHelp).PadRight(helpIndentLength));
+
+                                string helpText = argument.ArgumentHelp;
+
+                                if (argument.IsEnum && displayMode != HelpDisplayMode.Full)
+                                {
+                                    if (helpText.Length != 0)
+                                        helpText += " ";
+
+                                    helpText += $"(values {string.Join(", ", Enum.GetNames(argument.ArgumentType)).ToLowerInvariant()})";
+                                }
+
+                                if (argument.ArgumentDefaultSet)
+                                {
+                                    if (helpText.Length != 0)
+                                        helpText += " ";
+
+                                    helpText += $"(default {argument.ArgumentDefaultValue.ToString().ToLowerInvariant()})";
+                                }
+
+                                if (helpText.Length > availableWidth)
+                                {
+                                    IEnumerable<string> split = SplitToLines(helpText, availableWidth);
+                                    foreach (var line in split)
                                     {
-                                        if (helpAttribute.Help.Length > availableWidth)
-                                        {
-                                            IEnumerable<string> split = SplitToLines(helpAttribute.Help, availableWidth);
-                                            foreach (var line in split)
-                                            {
-                                                if (line == split.First())
-                                                    sb.Append(line);
-                                                else
-                                                    sb.Append(helpPreSpacing + line);
+                                        if (line == split.First())
+                                            sb.Append(line);
+                                        else
+                                            sb.Append(helpPreSpacing + line);
 
-                                                if ((helpPreSpacing + line).Length != Console.WindowWidth)
-                                                    sb.AppendLine();
+                                        if ((helpPreSpacing + line).Length != Console.WindowWidth)
+                                            sb.AppendLine();
+                                    }
+                                }
+                                else
+                                {
+                                    sb.AppendLine(helpText);
+                                }
+
+                                // If the display is in full mode write out the enum values as a list
+                                // with their help text if they have any
+                                if (argument.IsEnum && displayMode == HelpDisplayMode.Full)
+                                {
+                                    // Has to filter out value__ because GetRuntimeFields() also includes the internal
+                                    // enum value field. Better methods don't exist at netstandard1.3
+                                    foreach (var enumValue in argument.ArgumentType.GetRuntimeFields().Where(f => f.Name != "value__"))
+                                    {
+                                        sb.Append((enumPreSpacing + enumValue.Name.ToLowerInvariant()).PadRight(helpIndentLength));
+
+                                        var helpAttribute = enumValue.GetCustomAttribute<HelpAttribute>();
+
+                                        if (helpAttribute != null)
+                                        {
+                                            if (helpAttribute.Help.Length > availableWidth)
+                                            {
+                                                IEnumerable<string> split = SplitToLines(helpAttribute.Help, availableWidth);
+                                                foreach (var line in split)
+                                                {
+                                                    if (line == split.First())
+                                                        sb.Append(line);
+                                                    else
+                                                        sb.Append(helpPreSpacing + line);
+
+                                                    if ((helpPreSpacing + line).Length != Console.WindowWidth)
+                                                        sb.AppendLine();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                sb.AppendLine(helpAttribute.Help);
                                             }
                                         }
                                         else
                                         {
-                                            sb.AppendLine(helpAttribute.Help);
+                                            sb.AppendLine();
                                         }
                                     }
-                                    else
+                                }
+                            }
+                        }
+                    }
+
+                    // If there are any commands, loop over em' and print like above
+                    if (_commandCatagories.Any())
+                    {
+                        string commandPreSpacing = string.Join("", Enumerable.Repeat(" ", commandStartLength));
+
+                        sb.AppendLine();
+                        sb.AppendLine("Commands:");
+
+                        foreach (var commandCatagory in _commandCatagories)
+                        {
+                            if (_commandCatagories.Count > 1)
+                            {
+                                if (commandCatagory != _commandCatagories.First())
+                                {
+                                    sb.AppendLine();
+                                }
+
+                                sb.AppendLine($"  {commandCatagory.CatagoryName}:");
+                            }
+
+                            foreach (var command in commandCatagory.Commands)
+                            {
+                                string commandHelp = "";
+
+                                commandHelp += $"{command.CommandName}";
+
+                                sb.Append((commandPreSpacing + commandHelp).PadRight(helpIndentLength));
+
+                                string helpText = command.CommandHelp;
+
+                                if (helpText.Length > availableWidth)
+                                {
+                                    IEnumerable<string> split = SplitToLines(helpText, availableWidth);
+                                    foreach (var line in split)
                                     {
-                                        sb.AppendLine();
+                                        if (line == split.First())
+                                            sb.Append(line);
+                                        else
+                                            sb.Append(helpPreSpacing + line);
+
+                                        if ((helpPreSpacing + line).Length != Console.WindowWidth)
+                                            sb.AppendLine();
                                     }
                                 }
+                                else
+                                {
+                                    sb.AppendLine(helpText);
+                                }
                             }
                         }
                     }
-                }
 
-                // If there are any commands, loop over em' and print like above
-                if (_commandCatagories.Any())
-                {
-                    string commandPreSpacing = string.Join("", Enumerable.Repeat(" ", commandStartLength));
-
-                    sb.AppendLine();
-                    sb.AppendLine("Commands:");
-
-                    foreach (var commandCatagory in _commandCatagories)
+                    // Finally any paramters will be printed if there are any
+                    if (_parameterCatagories.Any())
                     {
-                        if (_commandCatagories.Count > 1)
+                        string parameterPreSpacing = string.Join("", Enumerable.Repeat(" ", parameterStartLength));
+
+                        sb.AppendLine();
+                        sb.AppendLine("Paramters:");
+
+                        foreach (var parameterCatagory in _parameterCatagories)
                         {
-                            if (commandCatagory != _commandCatagories.First())
+                            if (_parameterCatagories.Count > 1)
                             {
-                                sb.AppendLine();
-                            }
-
-                            sb.AppendLine($"  {commandCatagory.CatagoryName}:");
-                        }
-
-                        foreach (var command in commandCatagory.Commands)
-                        {
-                            string commandHelp = "";
-
-                            commandHelp += $"{command.CommandName}";
-
-                            sb.Append((commandPreSpacing + commandHelp).PadRight(helpIndentLength));
-
-                            string helpText = command.CommandHelp;
-                            
-                            if (helpText.Length > availableWidth)
-                            {
-                                IEnumerable<string> split = SplitToLines(helpText, availableWidth);
-                                foreach (var line in split)
+                                if (parameterCatagory != _parameterCatagories.First())
                                 {
-                                    if (line == split.First())
-                                        sb.Append(line);
-                                    else
-                                        sb.Append(helpPreSpacing + line);
-
-                                    if ((helpPreSpacing + line).Length != Console.WindowWidth)
-                                        sb.AppendLine();
+                                    sb.AppendLine();
                                 }
-                            }
-                            else
-                            {
-                                sb.AppendLine(helpText);
-                            }
-                        }
-                    }
-                }
 
-                // Finally any paramters will be printed if there are any
-                if (_paramterCatagories.Any())
-                {
-                    string paramterPreSpacing = string.Join("", Enumerable.Repeat(" ", paramterStartLength));
-
-                    sb.AppendLine();
-                    sb.AppendLine("Paramters:");
-
-                    foreach (var parameterCatagory in _paramterCatagories)
-                    {
-                        if (_paramterCatagories.Count > 1)
-                        {
-                            if (parameterCatagory != _paramterCatagories.First())
-                            {
-                                sb.AppendLine();
+                                sb.AppendLine($"  {parameterCatagory.CatagoryName}:");
                             }
 
-                            sb.AppendLine($"  {parameterCatagory.CatagoryName}:");
-                        }
-
-                        foreach (var parameter in parameterCatagory.Parameters)
-                        {
-                            string parameterHelp = "";
-
-                            parameterHelp += $"{parameter.ParameterName}";
-
-                            sb.Append((paramterPreSpacing + parameterHelp).PadRight(helpIndentLength));
-
-                            string helpText = parameter.ParamterHelp;
-
-                            if (helpText.Length > availableWidth)
+                            foreach (var parameter in parameterCatagory.Parameters)
                             {
-                                IEnumerable<string> split = SplitToLines(helpText, availableWidth);
-                                foreach (var line in split)
+                                string parameterHelp = "";
+
+                                parameterHelp += $"{parameter.ParameterName}";
+
+                                sb.Append((parameterPreSpacing + parameterHelp).PadRight(helpIndentLength));
+
+                                string helpText = parameter.ParameterHelp;
+
+                                if (helpText.Length > availableWidth)
                                 {
-                                    if (line == split.First())
-                                        sb.Append(line);
-                                    else
-                                        sb.Append(helpPreSpacing + line);
+                                    IEnumerable<string> split = SplitToLines(helpText, availableWidth);
+                                    foreach (var line in split)
+                                    {
+                                        if (line == split.First())
+                                            sb.Append(line);
+                                        else
+                                            sb.Append(helpPreSpacing + line);
 
-                                    if ((helpPreSpacing + line).Length != Console.WindowWidth)
-                                        sb.AppendLine();
+                                        if ((helpPreSpacing + line).Length != Console.WindowWidth)
+                                            sb.AppendLine();
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                sb.AppendLine(helpText);
+                                else
+                                {
+                                    sb.AppendLine(helpText);
+                                }
                             }
                         }
                     }
                 }
             }
 
-            Console.Write(sb.ToString());
+            ConsoleHelper.Write(sb.ToString());
         }
 
         private (string flagPrefixUsed, string namePrefixUsed) GetPrefixUsed(string prefix)
@@ -857,7 +950,7 @@ namespace argparse
             // TODO: Parse multi values as comma seperated lists like: --files file1.txt,file2.txt,"file 3.txt"
             // TODO: Parse DateTime values as possible ticks
 
-            IArgument argument = 
+            IArgument argument =
                 _argumentCatagories
                     .SelectMany(ac => ac.Arguments)
                     .SingleOrDefault(a => arg.argument.ToLowerInvariant().StartsWith(a.ArgumentName.ToLowerInvariant()));
@@ -871,7 +964,7 @@ namespace argparse
                 bool argumentRequiresValue = !argument.IsCountable && argument.ArgumentType != typeof(bool);
 
                 // Check if the argument has a parameter or not
-                // If the length of the argument is the same as the name, 
+                // If the length of the argument is the same as the name,
                 // there isn't any argument value here, might be on nextArg if allowed
                 if (arg.argument.Length == argument.ArgumentName.Length)
                 {
@@ -933,7 +1026,7 @@ namespace argparse
                         return (success: true, nextArgumentUsed: false);
                     }
                 }
-                // If the next character of the argument is a deliminator: 
+                // If the next character of the argument is a deliminator:
                 // substring on the delim and set to property of the argument
                 else if (arg.argument[argument.ArgumentName.Length] == ArgumentHelper.WindowsDeliminator || arg.argument[argument.ArgumentName.Length] == ArgumentHelper.Deliminator)
                 {
@@ -1191,7 +1284,7 @@ namespace argparse
 
         /// <summary>
         /// A list of supported types that are allowed for arguments or parameters.
-        /// 
+        ///
         /// This includes:
         /// - bool
         /// - byte
@@ -1207,8 +1300,8 @@ namespace argparse
         /// - DateTime
         /// - Enum
         /// - ImmutableArray{T} (of the above)
-        /// 
-        /// * Some of the types are not available on all situations, 
+        ///
+        /// * Some of the types are not available on all situations,
         /// e.g. you cannot use DateTime on a countable argument.
         /// </summary>
         public static readonly IReadOnlyCollection<Type> SupportedTypes = new Type[]

@@ -52,7 +52,7 @@ namespace argparse
 
             if (arg.IsMultiple && _parameters.Any(p => p.IsMultiple))
             {
-                // TODO: Only allow one multi-paramter across all catagories
+                // TODO: Only allow one multi-parameter across all catagories
                 throw new ArgumentException($"{argument.Name} is set to be a multi parameter but there is already one defined. You cannot have two multi-parameters in one catagory.", nameof(argument));
             }
 
@@ -71,11 +71,11 @@ namespace argparse
             }
 
             uint position = PositionStart + (uint)_parameters.Count;
-            var arg = new MultiParamter<TArgumentOptions, TArgument>(_catagoryCreator, this, property, position);
+            var arg = new MultiParameter<TArgumentOptions, TArgument>(_catagoryCreator, this, property, position);
 
             if (arg.IsMultiple && _parameters.Any(p => p.IsMultiple))
             {
-                // TODO: Only allow one multi-paramter across all catagories
+                // TODO: Only allow one multi-parameter across all catagories
                 throw new ArgumentException($"{argument.Name} is set to be a multi parameter but there is already one defined. You cannot have two multi-parameters in one catagory.", nameof(argument));
             }
 

@@ -130,7 +130,7 @@ namespace argparse.UnitTests.ArgumentParserTests
             parser.Parse(argumentWithCommaSeperatedValues);
 
             ImmutableArray<string> parsedValues = parser.GetArgumentCatagory<MultiOptions>().String;
-            
+
             Assert.Equal(values.Length, parsedValues.Length);
 
             for (int i = 0; i < values.Length; i++)
@@ -141,7 +141,7 @@ namespace argparse.UnitTests.ArgumentParserTests
 
         [Theory]
         // User for this case types in: (c# removes the "" around value 2)
-        // app.exe --string value1,"value 2" 
+        // app.exe --string value1,"value 2"
         [InlineData(new[] { "--string", "value1,value2", "--string", "value3" }, "value1,value2", "value3")]
         [InlineData(new[] { "--string", "value1,value 2", "--string", "value3" }, "value1,value 2", "value3")]
         [InlineData(new[] { "--string", "value1,value 2,value3", "--string", "value4" }, "value1,value 2,value3", "value4")]
@@ -193,7 +193,7 @@ namespace argparse.UnitTests.ArgumentParserTests
                         .Flag('f');
 
             parser.Parse(argumentWithCommaSeperatedValues);
-            
+
             Assert.Equal(value, parser.GetArgumentCatagory<BasicOptions>().FlaggableEnum);
         }
 
@@ -284,7 +284,7 @@ namespace argparse.UnitTests.ArgumentParserTests
         }
 
         [Fact]
-        public void ParserShouldAddMultipleValuesOnMultiParamters()
+        public void ParserShouldAddMultipleValuesOnMultiParameters()
         {
             ArgumentParser parser = ArgumentParser.Create("app");
             parser
@@ -673,7 +673,7 @@ namespace argparse.UnitTests.ArgumentParserTests
 
             Assert.Equal(expectedValue, parser.GetArgumentCatagory<BasicOptions>().Double);
         }
-        
+
         [Fact] // Has to be fact because decimal isn't CLR :(
         public void ParserCanParseDecimal()
         {
@@ -743,7 +743,7 @@ namespace argparse.UnitTests.ArgumentParserTests
             parser
                 .CreateCommandCatagory<Commands>()
                     .WithCommand(
-                        x => x.CommandWithArguments, 
+                        x => x.CommandWithArguments,
                         (cp) => cp.CreateArgumentCatagory<BasicOptions>().WithArgument(x => x.Boolean));
 
             parser.Parse("commandwitharguments", "--boolean");

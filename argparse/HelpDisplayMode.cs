@@ -7,6 +7,10 @@ namespace argparse
     public enum HelpDisplayMode
     {
         /// <summary>
+        /// Only prints out the usage line
+        /// </summary>
+        JustUsage,
+        /// <summary>
         /// Just the usage and preable.
         /// Set when the application was called without any command or arguments.
         /// </summary>
@@ -16,7 +20,7 @@ namespace argparse
         /// </summary>
         Expanded,
         /// <summary>
-        /// Includes the description on enum values and other such things 
+        /// Includes the description on enum values and other such things
         /// which required a more detailed output.
         /// This is called when 'full' is passed after the help argument.
         /// </summary>

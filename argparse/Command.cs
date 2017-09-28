@@ -16,7 +16,7 @@ namespace argparse
 
         public string CommandHelp { get; set; } = string.Empty;
 
-        public string CommandDescription { get; set; } = string.Empty;
+        public string CommandSummary { get; set; } = string.Empty;
 
         public PropertyInfo Property { get; }
 
@@ -68,7 +68,7 @@ namespace argparse
 
         public ICommand<TOptions> Summary(string summary)
         {
-            CommandDescription = summary;
+            CommandSummary = summary;
 
             return this;
         }
