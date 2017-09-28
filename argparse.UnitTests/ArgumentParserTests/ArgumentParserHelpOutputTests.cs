@@ -78,6 +78,19 @@ preable")]
             Assert.Equal($"app: error: argument '--string' is required{nl}{nl}Usage: app [OPTIONS]{nl}", _consoleOutputHook.RawString.ToString());
         }
 
+        [Fact]
+        public void ParserShouldHaveNoOutputUponSuccess()
+        {
+            ArgumentParser parser = CreateArgumentParser(new ArgumentParserOptions { ApplicationName = "app" });
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                    .WithArgument(x => x.Boolean);
+
+            parser.Parse("--boolean");
+
+            Assert.Equal(string.Empty, _consoleOutputHook.RawString.ToString());
+        }
+
         private ArgumentParser CreateArgumentParser(ArgumentParserOptions options)
         {
             options.StdOut = _consoleOutputHook;

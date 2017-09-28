@@ -510,7 +510,7 @@ namespace argparse
                 {
                     WriteHelp(HelpDisplayMode.Compact, ArgumentHelper.FlagPrefix, ArgumentHelper.NamePrefix);
                 }
-                else
+                else if (!success)
                 {
                     ConsoleHelper.WriteLine();
                     WriteHelp(HelpDisplayMode.JustUsage, ArgumentHelper.FlagPrefix, ArgumentHelper.NamePrefix);
