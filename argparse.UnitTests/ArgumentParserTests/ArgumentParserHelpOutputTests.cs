@@ -16,16 +16,14 @@ namespace argparse.UnitTests.ArgumentParserTests
         public ArgumentParserHelpOutputTests()
         {
             _consoleOutputHook = new ConsoleOutputHook();
-            Console.SetOut(_consoleOutputHook);
-            Console.SetError(_consoleOutputHook);
         }
 
         [Fact]
         public void BasicHelpOutput()
         {
-            ArgumentParser.Create("app").Parse();
+            CreateArgumentParser(new ArgumentParserOptions { ApplicationName = "app" }).Parse();
 
-            Assert.Equal($"Usage: app{nl}{nl}Run 'app --help' to see a list of all options and more information.{nl}", _consoleOutputHook.RawString.ToString());
+            Assert.Equal($"Usage: app{nl}{nl}Run 'app --help' or 'app --help full' to see a list of all options and more information.{nl}", _consoleOutputHook.RawString.ToString());
         }
 
         [Theory]
@@ -34,9 +32,9 @@ namespace argparse.UnitTests.ArgumentParserTests
         [InlineData("   ")]
         public void BasicHelpOutputWithEmptyPreambleIsExcluded(string preamble)
         {
-            ArgumentParser.Create("app", preamble).Parse();
+            CreateArgumentParser(new ArgumentParserOptions { ApplicationName = "app", Preamble = preamble }).Parse();
 
-            Assert.Equal($"Usage: app{nl}{nl}Run 'app --help' to see a list of all options and more information.{nl}", _consoleOutputHook.RawString.ToString());
+            Assert.Equal($"Usage: app{nl}{nl}Run 'app --help' or 'app --help full' to see a list of all options and more information.{nl}", _consoleOutputHook.RawString.ToString());
         }
 
         [Theory]
@@ -44,12 +42,48 @@ namespace argparse.UnitTests.ArgumentParserTests
         [InlineData(@"Some multi
 line
 preable")]
-        [InlineData(@"Badly\nFormatted\nPreamble")]
+        [InlineData(@"Inline\nFormatted\nPreamble")]
         public void BasicHelpOutputWithPreamble(string preamble)
         {
-            ArgumentParser.Create("app", preamble).Parse();
+            CreateArgumentParser(new ArgumentParserOptions { ApplicationName = "app", Preamble = preamble }).Parse();
 
-            Assert.Equal($"{preamble}{nl}{nl}Usage: app{nl}{nl}Run 'app --help' to see a list of all options and more information.{nl}", _consoleOutputHook.RawString.ToString());
+            Assert.Equal($"{preamble}{nl}{nl}Usage: app{nl}{nl}Run 'app --help' or 'app --help full' to see a list of all options and more information.{nl}", _consoleOutputHook.RawString.ToString());
+        }
+
+        [Fact]
+        public void RequiredParameterShouldThrowErrorOnScreen()
+        {
+            ArgumentParser parser = CreateArgumentParser(new ArgumentParserOptions { ApplicationName = "app" });
+            parser
+                .CreateParameterCatagory<BasicOptions>()
+                        .WithParameter(x => x.String)
+                            .Required();
+
+            parser.Parse();
+
+            Assert.Equal($"app: error: parameter 'STRING' is required{nl}{nl}Usage: app STRING{nl}", _consoleOutputHook.RawString.ToString());
+        }
+
+        [Fact]
+        public void RequiredArgumentShouldThrowErrorOnScreen()
+        {
+            ArgumentParser parser = CreateArgumentParser(new ArgumentParserOptions { ApplicationName = "app" });
+            parser
+                .CreateArgumentCatagory<BasicOptions>()
+                        .WithArgument(x => x.String)
+                            .Required();
+
+            parser.Parse();
+
+            Assert.Equal($"app: error: argument '--string' is required{nl}{nl}Usage: app [OPTIONS]{nl}", _consoleOutputHook.RawString.ToString());
+        }
+
+        private ArgumentParser CreateArgumentParser(ArgumentParserOptions options)
+        {
+            options.StdOut = _consoleOutputHook;
+            options.StdErr = _consoleOutputHook;
+
+            return ArgumentParser.Create(options);
         }
     }
 }

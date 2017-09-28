@@ -4,10 +4,10 @@ using System.Reflection;
 
 namespace argparse
 {
-    public static class ConversionHelper
+    internal static class ConversionHelper
     {
-        public static object Convert(this string str, Type type) => Convert(str as object, type);
-        public static object Convert(this object obj, Type type)
+        internal static object Convert(this string str, Type type) => Convert(str as object, type);
+        internal static object Convert(this object obj, Type type)
         {
             try
             {

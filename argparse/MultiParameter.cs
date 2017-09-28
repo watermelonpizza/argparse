@@ -9,9 +9,9 @@ using System.Text;
 
 namespace argparse
 {
-    internal class MultiParamter<TArgumentOptions, TArgument> : Parameter<TArgumentOptions, TArgument>, IMultiProperty
+    internal class MultiParameter<TArgumentOptions, TArgument> : Parameter<TArgumentOptions, TArgument>, IMultiProperty
     {
-        public MultiParamter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property, uint position)
+        public MultiParameter(ICreateParameterCatagory catagoryCreator, IParameterCatagory<TArgumentOptions> currentCatagory, PropertyInfo property, uint position)
             : base(catagoryCreator, currentCatagory, property, position)
         {
             IsMultiple = true;

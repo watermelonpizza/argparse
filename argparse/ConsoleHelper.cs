@@ -6,83 +6,98 @@ namespace argparse
 {
     public class ConsoleHelper
     {
-        ConsoleLogLevel _minConsoleLogLevel;
+        ArgumentParserOptions _options;
 
-        internal ConsoleHelper(ConsoleLogLevel minimumConsoleLogLevel)
+        internal ConsoleHelper(ArgumentParserOptions options)
         {
-            _minConsoleLogLevel = minimumConsoleLogLevel;
+            _options = options;
+        }
+
+        public void Write(string str)
+        {
+            _options.StdOut.Write(str);
+        }
+
+        public void WriteLine()
+        {
+            _options.StdOut.WriteLine();
+        }
+
+        public void WriteLine(string str)
+        {
+            _options.StdOut.WriteLine(str);
         }
 
         public void WriteVerbose(string verbose)
         {
-            if (_minConsoleLogLevel <= ConsoleLogLevel.Verbose)
+            if (_options.ConsoleLogLevel <= ConsoleLogLevel.Verbose)
             {
-                PrefixLevel(ConsoleLogLevel.Verbose, false);
-                Console.WriteLine(verbose);
+                PrefixLine(ConsoleLogLevel.Verbose, false);
+                _options.StdOut.WriteLine(verbose);
                 Console.ResetColor();
             }
         }
 
         public void WriteInfo(string info)
         {
-            if (_minConsoleLogLevel <= ConsoleLogLevel.Info)
+            if (_options.ConsoleLogLevel <= ConsoleLogLevel.Info)
             {
-                PrefixLevel(ConsoleLogLevel.Info);
-                Console.WriteLine(info);
+                PrefixLine(ConsoleLogLevel.Info);
+                _options.StdOut.WriteLine(info);
             }
         }
 
         public void WriteWarning(string warning)
         {
-            if (_minConsoleLogLevel <= ConsoleLogLevel.Warn)
+            if (_options.ConsoleLogLevel <= ConsoleLogLevel.Warn)
             {
-                PrefixLevel(ConsoleLogLevel.Warn);
-                Console.WriteLine(warning);
+                PrefixLine(ConsoleLogLevel.Warn);
+                _options.StdOut.WriteLine(warning);
             }
         }
 
         public void WriteError(string error)
         {
-            if (_minConsoleLogLevel <= ConsoleLogLevel.Error)
+            if (_options.ConsoleLogLevel <= ConsoleLogLevel.Error)
             {
-                PrefixLevel(ConsoleLogLevel.Error);
-                Console.Error.WriteLine(error);
+                PrefixLine(ConsoleLogLevel.Error);
+                _options.StdErr.WriteLine(error);
             }
         }
 
         public void WriteFatal(string fatal)
         {
-            if (_minConsoleLogLevel <= ConsoleLogLevel.Fatal)
+            if (_options.ConsoleLogLevel <= ConsoleLogLevel.Fatal)
             {
-                PrefixLevel(ConsoleLogLevel.Fatal);
-                Console.Error.WriteLine(fatal);
+                PrefixLine(ConsoleLogLevel.Fatal);
+                _options.StdErr.WriteLine(fatal);
             }
         }
 
-        private void PrefixLevel(ConsoleLogLevel level, bool reset = true)
+        private void PrefixLine(ConsoleLogLevel level, bool reset = true)
         {
             switch (level)
             {
                 case ConsoleLogLevel.Verbose:
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.Write("verb: ");
+                    _options.StdOut.Write($"{_options.ApplicationName}: verbose: ");
                     break;
                 case ConsoleLogLevel.Info:
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.Write("info: ");
+                    _options.StdOut.Write($"{_options.ApplicationName}: info: ");
                     break;
                 case ConsoleLogLevel.Warn:
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("warn: ");
+                    _options.StdOut.Write($"{_options.ApplicationName}: warning: ");
                     break;
                 case ConsoleLogLevel.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Error.Write("err!: ");
+                    _options.StdErr.Write($"{_options.ApplicationName}: error: ");
                     break;
                 case ConsoleLogLevel.Fatal:
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.BackgroundColor = ConsoleColor.Red;
-                    Console.Error.Write("fatl: ");
+                    _options.StdErr.Write($"{_options.ApplicationName}: fatal: ");
                     break;
                 default:
                     throw new Exception("Unknown Console Level");

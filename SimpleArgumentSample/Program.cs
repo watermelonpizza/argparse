@@ -31,9 +31,11 @@ namespace SimpleArgumentSample
         // Usage: app [OPTIONS] SCOPE [BasicArgumentParser]
         static void Main(string[] args)
         {
-            ArgumentParser parser = ArgumentParser.Create(
-                "simpleargumentsample",
-                "Simple Argument Sample Application");
+            ArgumentParser parser = ArgumentParser.Create(options =>
+            {
+                options.ApplicationName = "simpleargumentsample";
+                options.ApplicationDescription = "Simple Argument Sample Application";
+            });
 
             parser.CreateCommandCatagory<SimpleCommands>()
                 .WithCommand(c => c.Config);
@@ -68,7 +70,7 @@ namespace SimpleArgumentSample
             //        .WithMultiParameter(x => x.Destination)
             //            .Required()
             //            .Name("dest")
-            //            .Help("Paramters can have help too!");
+            //            .Help("Parameters can have help too!");
 
             //parser
             //    .CreateCommandCatagory<Commands>()
@@ -87,7 +89,7 @@ namespace SimpleArgumentSample
 
             //NetworkOptions no = parser.GetArgumentCatagory<NetworkOptions>();
             //PositionalOptions po = parser.GetParameterCatagory<PositionalOptions>();
-            
+
 
             //Console.WriteLine("general options");
             //Console.WriteLine(JsonConvert.SerializeObject(go));
